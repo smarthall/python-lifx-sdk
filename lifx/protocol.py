@@ -1,14 +1,45 @@
 from bitstruct import unpack, pack, byteswap, calcsize
+from collections import namedtuple
+
+# Packet tuple
+lifx_packet = namedtuple('lifx_packet', ['frame_header', 'frame_address', 'protocol_header', 'payload'])
 
 # Header Descriptions
-frame_header_format = 'u16u2u1u1u12u32'
-frame_header_byteswap = '224'
+frame_header = {
+        'format': 'u16u2u1u1u12u32',
+        'byteswap': '224',
+        'fields': namedtuple('frame_header', [
+            'size',
+            'origin',
+            'tagged',
+            'addressable',
+            'protocol',
+            'source'
+        ]),
+}
 
-frame_address_format = 'u64u48u6u1u1u8'
-frame_address_byteswap = '8611'
+frame_address = {
+        'format': 'u64u48u6u1u1u8',
+        'byteswap': '8611',
+        'fields': namedtuple('frame_address', [
+            'target',
+            'reserved1',
+            'reserved2',
+            'ack_required',
+            'res_required',
+            'sequence'
+        ]),
+}
 
-protocol_header_format = 'u64u16u16'
-protocol_header_byteswap = '822'
+protocol_header = {
+        'format': 'u64u16u16',
+        'byteswap': '822',
+        'fields': namedtuple('protocol_header', [
+            'reserved1',
+            'pkt_type',
+            'reserved2'
+        ]),
+}
 
 # Device Messages
 TYPE_GETSERVICE = 2
@@ -47,144 +78,250 @@ messages = {
     TYPE_GETSERVICE: {
         'format': '',
         'byteswap': '',
+        'fields': namedtuple('payload_getservice', [
+        ]),
     },
     TYPE_STATESERVICE: {
         'format': 'u8u32',
         'byteswap': '14',
+        'fields': namedtuple('payload_getservice', [
+            'service',
+            'port',
+        ]),
     },
     TYPE_GETHOSTINFO: {
         'format': '',
         'byteswap': '',
+        'fields': namedtuple('payload_getservice', [
+        ]),
     },
     TYPE_STATEHOSTINFO: {
         'format': 'u32u32u32u16',
         'byteswap': '4442',
+        'fields': namedtuple('payload_getservice', [
+            'signal',
+            'tx',
+            'rx',
+            'reserved',
+        ]),
     },
     TYPE_GETHOSTFIRMWARE: {
         'format': '',
         'byteswap': '',
+        'fields': namedtuple('payload_getservice', [
+        ]),
     },
     TYPE_STATEHOSTFIRMWARE: {
         'format': 'u64u64u32',
         'byteswap': '844',
+        'fields': namedtuple('payload_getservice', [
+            'build',
+            'reserved',
+            'version',
+        ]),
     },
     TYPE_GETWIFIINFO: {
         'format': '',
         'byteswap': '',
+        'fields': namedtuple('payload_getservice', [
+        ]),
     },
     TYPE_STATEWIFIINFO: {
         'format': 'u32u32u32u16',
         'byteswap': '4442',
+        'fields': namedtuple('payload_getservice', [
+            'signal',
+            'tx',
+            'rx',
+            'reserved',
+        ]),
     },
     TYPE_GETWIFIFIRMWARE: {
         'format': '',
         'byteswap': '',
+        'fields': namedtuple('payload_getservice', [
+        ]),
     },
     TYPE_STATEWIFIFIRMWARE: {
         'format': 'u64u64u32',
         'byteswap': '884',
+        'fields': namedtuple('payload_getservice', [
+            'build',
+            'reserved',
+            'version',
+        ]),
     },
     TYPE_GETPOWER: {
         'format': '',
         'byteswap': '',
+        'fields': namedtuple('payload_getservice', [
+        ]),
     },
     TYPE_SETPOWER: {
         'format': 'u16',
         'byteswap': '2',
+        'fields': namedtuple('payload_getservice', [
+            'level',
+        ]),
     },
     TYPE_STATEPOWER: {
         'format': 'u16',
         'byteswap': '2',
+        'fields': namedtuple('payload_getservice', [
+            'level',
+        ]),
     },
     TYPE_GETLABEL: {
         'format': '',
         'byteswap': '',
+        'fields': namedtuple('payload_getservice', [
+        ]),
     },
     TYPE_SETLABEL: {
         'format': 'b256',
         'byteswap': '1' * 32,
+        'fields': namedtuple('payload_getservice', [
+            'label',
+        ]),
     },
     TYPE_STATELABEL: {
         'format': 'b256',
         'byteswap': '1' * 32,
+        'fields': namedtuple('payload_getservice', [
+            'label',
+        ]),
     },
     TYPE_GETVERSION: {
         'format': '',
         'byteswap': '',
+        'fields': namedtuple('payload_getservice', [
+        ]),
     },
     TYPE_STATEVERSION: {
         'format': 'u32u32u32',
         'byteswap': '444',
+        'fields': namedtuple('payload_getservice', [
+            'vendor',
+            'product',
+            'version',
+        ]),
     },
     TYPE_GETINFO: {
         'format': '',
         'byteswap': '',
+        'fields': namedtuple('payload_getservice', [
+        ]),
     },
     TYPE_STATEINFO: {
         'format': 'u64u64u64',
         'byteswap': '888',
+        'fields': namedtuple('payload_getservice', [
+            'time',
+            'uptime',
+            'downtime',
+        ]),
     },
     TYPE_ACKNOWLEDGEMENT: {
         'format': '',
         'byteswap': '',
+        'fields': namedtuple('payload_getservice', [
+        ]),
     },
     TYPE_ECHOREQUEST: {
         'format': 'b64',
         'byteswap': '1' * 64,
+        'fields': namedtuple('payload_getservice', [
+            'payload',
+        ]),
     },
     TYPE_ECHORESPONSE: {
         'format': 'b64',
         'byteswap': '1' * 64,
+        'fields': namedtuple('payload_getservice', [
+            'payload',
+        ]),
     },
     TYPE_LIGHT_GET: {
         'format': '',
         'byteswap': '',
+        'fields': namedtuple('payload_getservice', [
+        ]),
     },
     TYPE_LIGHT_SETCOLOR: {
         'format': 'u8u16u16u16u16u32',
         'byteswap': '122224',
+        'fields': namedtuple('payload_getservice', [
+            'reserved',
+            'hue',
+            'saturation',
+            'brightness',
+            'kelvin',
+            'duration',
+        ]),
     },
     TYPE_LIGHT_STATE: {
         'format': 'u16u16u16u16s16u16b256u64',
         'byteswap': '222222' + '1' * 32 + '8',
+        'fields': namedtuple('payload_getservice', [
+            'hue',
+            'saturation',
+            'brightness',
+            'kelvin',
+            'reserved1',
+            'power',
+            'label',
+            'reserved2',
+        ]),
     },
     TYPE_LIGHT_GETPOWER: {
         'format': '',
         'byteswap': '',
+        'fields': namedtuple('payload_getservice', [
+        ]),
     },
     TYPE_LIGHT_SETPOWER: {
         'format': 'u16u32',
         'byteswap': '24',
+        'fields': namedtuple('payload_getservice', [
+            'level',
+            'duration',
+        ]),
     },
     TYPE_LIGHT_STATEPOWER: {
         'format': 'u16',
         'byteswap': '2',
+        'fields': namedtuple('payload_getservice', [
+            'level',
+        ]),
     },
 }
 
-def pack_section(fmt, bs, *args):
+def pack_section(section, *args):
     """Packs bytes into a header including the swap to little-endian"""
-    return byteswap(bs, pack(fmt, *args))
+    return byteswap(section['byteswap'], pack(section['format'], *args))
 
-def unpack_section(fmt, bs, data):
+def unpack_section(section, data):
     """Unpacks bytes into data, including the endian swap"""
-    return unpack(fmt, byteswap(bs, data))
+    unpacked = unpack(section['format'], byteswap(section['byteswap'], data))
+    return section['fields'](*unpacked)
+
+def section_size(section):
+    return calcsize(section['format'])
 
 def make_packet(source, target, ack_required, res_required, sequence, pkt_type, *args):
     # Frame header
-    packet_size = ( calcsize(frame_header_format)
-           + calcsize(frame_address_format)
-           + calcsize(protocol_header_format)
-           + calcsize(messages[pkt_type]['format']) ) / 8
+    packet_size = ( section_size(frame_header)
+           + section_size(frame_address)
+           + section_size(protocol_header)
+           + section_size(messages[pkt_type]) ) / 8
 
     origin = 0 # Origin is always zero
     tagged = 1 if target is not None else 0
     addressable = 1 # Addressable is always one
     protocol = 1024 # Only protocol 1024 so far
 
-    frame_header = pack_section(
-            frame_header_format,
-            frame_header_byteswap,
+    frame_header_data = pack_section(
+            frame_header,
             packet_size,
             origin,
             tagged,
@@ -198,9 +335,8 @@ def make_packet(source, target, ack_required, res_required, sequence, pkt_type, 
     res_required = 1 if res_required else 0
     ack_required = 1 if ack_required else 0
 
-    frame_address = pack_section(
-            frame_address_format,
-            frame_address_byteswap,
+    frame_address_data = pack_section(
+            frame_address,
             target,
             0, # Reserved
             0, # Reserved
@@ -210,26 +346,72 @@ def make_packet(source, target, ack_required, res_required, sequence, pkt_type, 
     )
 
     # Protocol Header
-    protocol_header = pack_section(
-            protocol_header_format,
-            protocol_header_byteswap,
+    protocol_header_data = pack_section(
+            protocol_header,
             0, # Reserved
             pkt_type,
             0, # Reserved
     )
 
     # Payload
-    payload = pack_section(
-            messages[pkt_type]['format'],
-            messages[pkt_type]['byteswap'],
+    payload_data = pack_section(
+            messages[pkt_type],
             *args
     )
 
-    packet = frame_header + frame_address + protocol_header + payload
+    packet = frame_header_data + frame_address_data + protocol_header_data + payload_data
 
     return packet
 
 
-def parse_packet():
-    pass
+def parse_packet(data):
+    # Frame Header
+    frame_header_size = section_size(frame_header) / 8
+    frame_header_data = data[0:frame_header_size]
+
+    frame_header_struct = unpack_section(
+            frame_header,
+            frame_header_data
+    )
+
+    if frame_header_struct.size != len(data):
+        return None
+
+    # Frame Address
+    frame_address_size = section_size(frame_address) / 8
+    frame_address_start = frame_header_size
+    frame_address_end = frame_header_size + frame_address_size
+    frame_address_data = data[frame_address_start:frame_address_end]
+    frame_address_struct = unpack_section(
+            frame_address,
+            frame_address_data
+    )
+
+    # Protocol Header
+    protocol_header_size = section_size(protocol_header) / 8
+    protocol_header_start = frame_address_end
+    protocol_header_end = protocol_header_start + protocol_header_size
+    protocol_header_data = data[protocol_header_start:protocol_header_end]
+    protocol_header_struct = unpack_section(
+            protocol_header,
+            protocol_header_data
+    )
+
+    # Payload
+    payload = messages[protocol_header_struct.pkt_type]
+    payload_size = section_size(payload) / 8
+    payload_start = protocol_header_end
+    payload_end = payload_start + payload_size
+    payload_data = data[payload_start:payload_end]
+    payload_struct = unpack_section(
+            payload,
+            payload_data
+    )
+
+    return lifx_packet(
+            frame_header_struct,
+            frame_address_struct,
+            protocol_header_struct,
+            payload_struct
+    )
 
