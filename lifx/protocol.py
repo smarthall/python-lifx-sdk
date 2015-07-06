@@ -29,6 +29,7 @@ TYPE_SETLABEL = 24
 TYPE_STATELABEL = 25
 TYPE_GETVERSION = 32
 TYPE_STATEVERSION = 33
+TYPE_GETINFO = 34
 TYPE_STATEINFO = 35
 TYPE_ACKNOWLEDGEMENT = 45
 TYPE_ECHOREQUEST = 58
@@ -123,7 +124,7 @@ messages = {
         'format': 'u64u64u64',
         'byteswap': '888',
     },
-    TYPE_ACKNOWLEGEMENT: {
+    TYPE_ACKNOWLEDGEMENT: {
         'format': '',
         'byteswap': '',
     },
@@ -168,4 +169,67 @@ def pack_section(fmt, bs, *args):
 def unpack_section(fmt, bs, data):
     """Unpacks bytes into data, including the endian swap"""
     return unpack(fmt, byteswap(bs, data))
+
+def make_packet(source, target, ack_required, res_required, sequence, pkt_type, *args):
+    # Frame header
+    packet_size = ( calcsize(frame_header_format)
+           + calcsize(frame_address_format)
+           + calcsize(protocol_header_format)
+           + calcsize(messages[pkt_type]['format']) ) / 8
+
+    origin = 0 # Origin is always zero
+    tagged = 1 if target is not None else 0
+    addressable = 1 # Addressable is always one
+    protocol = 1024 # Only protocol 1024 so far
+
+    frame_header = pack_section(
+            frame_header_format,
+            frame_header_byteswap,
+            packet_size,
+            origin,
+            tagged,
+            addressable,
+            protocol,
+            source,
+    )
+
+    # Frame Address
+    target = 0 if target is not None else target
+    res_required = 1 if res_required else 0
+    ack_required = 1 if ack_required else 0
+
+    frame_address = pack_section(
+            frame_address_format,
+            frame_address_byteswap,
+            target,
+            0, # Reserved
+            0, # Reserved
+            ack_required,
+            res_required,
+            sequence,
+    )
+
+    # Protocol Header
+    protocol_header = pack_section(
+            protocol_header_format,
+            protocol_header_byteswap,
+            0, # Reserved
+            pkt_type,
+            0, # Reserved
+    )
+
+    # Payload
+    payload = pack_section(
+            messages[pkt_type]['format'],
+            messages[pkt_type]['byteswap'],
+            *args
+    )
+
+    packet = frame_header + frame_address + protocol_header + payload
+
+    return packet
+
+
+def parse_packet():
+    pass
 
