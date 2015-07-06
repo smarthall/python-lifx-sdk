@@ -84,7 +84,7 @@ messages = {
     TYPE_STATESERVICE: {
         'format': 'u8u32',
         'byteswap': '14',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_stateservice', [
             'service',
             'port',
         ]),
@@ -92,13 +92,13 @@ messages = {
     TYPE_GETHOSTINFO: {
         'format': '',
         'byteswap': '',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_gethostinfo', [
         ]),
     },
     TYPE_STATEHOSTINFO: {
         'format': 'u32u32u32u16',
         'byteswap': '4442',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_statehostinfo', [
             'signal',
             'tx',
             'rx',
@@ -108,13 +108,13 @@ messages = {
     TYPE_GETHOSTFIRMWARE: {
         'format': '',
         'byteswap': '',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_gethostfirmware', [
         ]),
     },
     TYPE_STATEHOSTFIRMWARE: {
         'format': 'u64u64u32',
         'byteswap': '844',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_statehostfirmware', [
             'build',
             'reserved',
             'version',
@@ -123,13 +123,13 @@ messages = {
     TYPE_GETWIFIINFO: {
         'format': '',
         'byteswap': '',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_getwifiinfo', [
         ]),
     },
     TYPE_STATEWIFIINFO: {
         'format': 'u32u32u32u16',
         'byteswap': '4442',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_statewifiinfo', [
             'signal',
             'tx',
             'rx',
@@ -139,13 +139,13 @@ messages = {
     TYPE_GETWIFIFIRMWARE: {
         'format': '',
         'byteswap': '',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_wififirmware', [
         ]),
     },
     TYPE_STATEWIFIFIRMWARE: {
         'format': 'u64u64u32',
         'byteswap': '884',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_statewififirmware', [
             'build',
             'reserved',
             'version',
@@ -154,53 +154,53 @@ messages = {
     TYPE_GETPOWER: {
         'format': '',
         'byteswap': '',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_getpower', [
         ]),
     },
     TYPE_SETPOWER: {
         'format': 'u16',
         'byteswap': '2',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_setpower', [
             'level',
         ]),
     },
     TYPE_STATEPOWER: {
         'format': 'u16',
         'byteswap': '2',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_statepower', [
             'level',
         ]),
     },
     TYPE_GETLABEL: {
         'format': '',
         'byteswap': '',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_getlabel', [
         ]),
     },
     TYPE_SETLABEL: {
         'format': 'b256',
         'byteswap': '1' * 32,
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_setlabel', [
             'label',
         ]),
     },
     TYPE_STATELABEL: {
         'format': 'b256',
         'byteswap': '1' * 32,
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_statelabel', [
             'label',
         ]),
     },
     TYPE_GETVERSION: {
         'format': '',
         'byteswap': '',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_getversion', [
         ]),
     },
     TYPE_STATEVERSION: {
         'format': 'u32u32u32',
         'byteswap': '444',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_stateversion', [
             'vendor',
             'product',
             'version',
@@ -209,13 +209,13 @@ messages = {
     TYPE_GETINFO: {
         'format': '',
         'byteswap': '',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_getinfo', [
         ]),
     },
     TYPE_STATEINFO: {
         'format': 'u64u64u64',
         'byteswap': '888',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_stateinfo', [
             'time',
             'uptime',
             'downtime',
@@ -224,33 +224,33 @@ messages = {
     TYPE_ACKNOWLEDGEMENT: {
         'format': '',
         'byteswap': '',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_acknowledgement', [
         ]),
     },
     TYPE_ECHOREQUEST: {
         'format': 'b64',
         'byteswap': '1' * 64,
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_echorequest', [
             'payload',
         ]),
     },
     TYPE_ECHORESPONSE: {
         'format': 'b64',
         'byteswap': '1' * 64,
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_echoresponse', [
             'payload',
         ]),
     },
     TYPE_LIGHT_GET: {
         'format': '',
         'byteswap': '',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_light_get', [
         ]),
     },
     TYPE_LIGHT_SETCOLOR: {
         'format': 'u8u16u16u16u16u32',
         'byteswap': '122224',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_light_setcolor', [
             'reserved',
             'hue',
             'saturation',
@@ -262,7 +262,7 @@ messages = {
     TYPE_LIGHT_STATE: {
         'format': 'u16u16u16u16s16u16b256u64',
         'byteswap': '222222' + '1' * 32 + '8',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_light_state', [
             'hue',
             'saturation',
             'brightness',
@@ -276,13 +276,13 @@ messages = {
     TYPE_LIGHT_GETPOWER: {
         'format': '',
         'byteswap': '',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_light_getpower', [
         ]),
     },
     TYPE_LIGHT_SETPOWER: {
         'format': 'u16u32',
         'byteswap': '24',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_light_setpower', [
             'level',
             'duration',
         ]),
@@ -290,7 +290,7 @@ messages = {
     TYPE_LIGHT_STATEPOWER: {
         'format': 'u16',
         'byteswap': '2',
-        'fields': namedtuple('payload_getservice', [
+        'fields': namedtuple('payload_light_statepower', [
             'level',
         ]),
     },
