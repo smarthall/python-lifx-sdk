@@ -306,9 +306,11 @@ def unpack_section(section, data):
     return section['fields'](*unpacked)
 
 def section_size(section):
+    """Returns the size of a section"""
     return calcsize(section['format'])
 
 def make_packet(source, target, ack_required, res_required, sequence, pkt_type, *args):
+    """Builds a packet from data supplied, required arguments depends on the packet type"""
     # Frame header
     packet_size = ( section_size(frame_header)
            + section_size(frame_address)
@@ -365,6 +367,7 @@ def make_packet(source, target, ack_required, res_required, sequence, pkt_type, 
 
 
 def parse_packet(data):
+    """Takes packet data as composes it into several namedtuple objects"""
     # Frame Header
     frame_header_size = section_size(frame_header) / 8
     frame_header_data = data[0:frame_header_size]
@@ -414,4 +417,7 @@ def parse_packet(data):
             protocol_header_struct,
             payload_struct
     )
+
+def discovery_packet(source, sequence):
+    return make_packet(source, 0, False, True, sequence, TYPE_GETSERVICE)
 
