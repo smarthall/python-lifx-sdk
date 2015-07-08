@@ -401,15 +401,21 @@ def parse_packet(data):
     )
 
     # Payload
-    payload = messages[protocol_header_struct.pkt_type]
-    payload_size = section_size(payload) / 8
     payload_start = protocol_header_end
-    payload_end = payload_start + payload_size
-    payload_data = data[payload_start:payload_end]
-    payload_struct = unpack_section(
-            payload,
-            payload_data
-    )
+    if protocol_header_struct.pkt_type in messages.keys():
+        payload = messages[protocol_header_struct.pkt_type]
+        payload_size = section_size(payload) / 8
+        payload_end = payload_start + payload_size
+        payload_data = data[payload_start:payload_end]
+        payload_struct = unpack_section(
+                payload,
+                payload_data
+        )
+    else:
+        payload_size = frame_address_struct.size - payload_start
+        payload_end = payload_start + payload_size
+        payload_struct = data[payload_start:payload_end]
+
 
     return lifx_packet(
             frame_header_struct,
