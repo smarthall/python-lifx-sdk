@@ -417,7 +417,7 @@ def parse_packet(data):
                 payload_data
         )
     else:
-        payload_size = frame_address_struct.size - payload_start
+        payload_size = frame_header_struct.size - payload_start
         payload_end = payload_start + payload_size
         payload_struct = data[payload_start:payload_end]
 
