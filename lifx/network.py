@@ -3,24 +3,37 @@ import socket
 import threading
 from binascii import hexlify
 
-class LIFXListener(threading.Thread):
-    def __init__(self, address='0.0.0.0', port=56700):
-        super(LIFXListener, self).__init__(
-                name='LIFXListener'
+class NetworkTransport(object):
+    def __init__(self, address='0.0.0.0'):
+        # Prepare a socket
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        sock.bind((address, 0))
+
+        self._socket = sock
+
+        self._listener = ListenerThread(sock)
+        self._listener.start()
+
+    def sendto(self, packet, address):
+        return self._socket.sendto(packet, address)
+
+class ListenerThread(threading.Thread):
+    """The Listener Thread grabs incoming packets, parses them and forwards them to the right listeners"""
+    def __init__(self, socket):
+        super(ListenerThread, self).__init__(
+                name='ListenerThread'
         )
 
+        # Exit on script exit
         self.daemon = True
 
-        self._address = address
-        self._port = port
+        # Store the socket for later
+        self._socket = socket
 
     def run(self):
-        # Start Listening
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.bind((self._address, self._port))
-
         while True:
-            data, addr = sock.recvfrom(1500)
+            data, addr = self._socket.recvfrom(1500)
             print '---'
             print 'Packet From:', addr
             print 'Raw Data:', hexlify(data)
