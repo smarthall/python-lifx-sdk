@@ -302,6 +302,11 @@ def pack_section(section, *args):
 
 def unpack_section(section, data):
     """Unpacks bytes into data, including the endian swap"""
+
+    # Bitstruct only takes byte arrays, some things give us strings
+    if type(data) != bytearray:
+        data = bytearray(data)
+
     unpacked = unpack(section['format'], byteswap(section['byteswap'], data))
     return section['fields'](*unpacked)
 
