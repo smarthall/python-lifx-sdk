@@ -20,11 +20,15 @@ class NetworkTransport(object):
 
         self._packet_handlers = []
 
-    def sendto(self, packet, address, port):
+    def _sendto(self, packet, address, port):
         return self._socket.sendto(packet, (address, port))
 
+    def send_packet(self, address, port, *args, **kwargs):
+        packet = protocol.make_packet(*args, **kwargs)
+        return self._sendto(packet, address, port)
+
     def send_discovery(self, source, sequence, address='255.255.255.255'):
-        return self.sendto(protocol.discovery_packet(source, sequence), address, DEFAULT_LIFX_PORT)
+        return self._sendto(protocol.discovery_packet(source, sequence), address, DEFAULT_LIFX_PORT)
 
     def register_packet_handler(self, handler):
         self._packet_handlers.append(handler)
