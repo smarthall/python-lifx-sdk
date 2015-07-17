@@ -8,12 +8,7 @@ import lifx.network
 # Start listening for packets
 net = lifx.network.NetworkTransport()
 
-def signal_handler(signal, frame):
-    print 'CTRL-C received. Exiting.'
-    sys.exit(0)
-
-signal.signal(signal.SIGINT, signal_handler)
-
+# Install a packet handler
 def packet_handler(host, port, packet):
     print '---'
     print 'Packet from: %s:%s' % (host, port)
@@ -21,7 +16,16 @@ def packet_handler(host, port, packet):
 
 net.register_packet_handler(packet_handler)
 
-net.send_discovery(1, 0, "172.16.1.255")
+# Install a signal handler
+def signal_handler(signal, frame):
+    print 'CTRL-C received. Exiting.'
+    sys.exit(0)
 
+signal.signal(signal.SIGINT, signal_handler)
+
+# Send a discovery packet (expecting replies)
+net.send_discovery(1, 0)
+
+# Wait for CTRL-C
 signal.pause()
 
