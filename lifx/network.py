@@ -2,8 +2,11 @@ import protocol
 import socket
 import threading
 from binascii import hexlify
+from collections import namedtuple
 
 DEFAULT_LIFX_PORT = 56700
+
+PacketHandler = namedtuple('PacketHandler', ['handler', 'pktfilter'])
 
 class NetworkTransport(object):
     """The network transport manages the network sockets and the networking threads"""
@@ -30,13 +33,19 @@ class NetworkTransport(object):
     def send_discovery(self, source, sequence, address='255.255.255.255'):
         return self._sendto(protocol.discovery_packet(source, sequence), address, DEFAULT_LIFX_PORT)
 
-    def register_packet_handler(self, handler):
-        self._packet_handlers.append(handler)
+    def register_packet_handler(self, handler, pktfilter=None):
+        # If None install all packet handler
+        if pktfilter is None:
+            pktfilter = lambda x:True
+
+        h = PacketHandler(handler, pktfilter)
+        self._packet_handlers.append(h)
 
     def _handle_packet(self, address, packet):
-        for handler in self._packet_handlers:
-            host, port = address
-            handler(host, port, packet)
+        for handler, pktfilter in self._packet_handlers:
+            if pktfilter(packet):
+                host, port = address
+                handler(host, port, packet)
 
 class ListenerThread(threading.Thread):
     """The Listener Thread grabs incoming packets, parses them and forwards them to the right listeners"""

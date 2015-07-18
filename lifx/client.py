@@ -28,7 +28,8 @@ class Client(object):
         self._devices = {}
 
         # Install our packet handler
-        self._transport.register_packet_handler(self._packethandler)
+        pktfilter = lambda p:p.protocol_header.pkt_type == protocol.TYPE_STATESERVICE
+        self._transport.register_packet_handler(self._servicepacket, pktfilter)
 
         # Send initial discovery packet
         self.discover()
@@ -44,40 +45,42 @@ class Client(object):
     def __del__():
         self._discoverpoll.cancel()
 
-    def _nseq(self):
+    @property
+    def _seq(self):
         seq = self._sequence
         self._sequence += 1
         return seq
 
-    def _packethandler(self, host, port, packet):
-        if packet.protocol_header.pkt_type == protocol.TYPE_STATESERVICE:
-            self._foundservice(host, packet.payload.service, packet.payload.port, packet.frame_address.target)
+    def _servicepacket(self, host, port, packet):
+        self._foundservice(host, packet.payload.service, packet.payload.port, packet.frame_address.target)
 
     def _foundservice(self, host, service, port, deviceid):
         if deviceid not in self._devices:
-            self._devices[deviceid] = device.Device(deviceid, host, self)
+            new_device = device.Device(deviceid, host, self)
+            pktfilter = lambda p:p.frame_address.target == deviceid
+            self._devices[deviceid] = new_device
 
         self._devices[deviceid].found_service(service, port)
 
     def _poll_device(self, device):
         return self._transport.send_packet(
-                device.get_host(),
+                device.host,
                 device.get_port(protocol.SERVICE_UDP),
                 self._source,
-                device.get_device_id(),
+                device.device_id,
                 False, # No Ack Required
                 True, # Response Required
-                self._nseq(),
+                self._seq,
                 protocol.TYPE_GETSERVICE,
         )
 
     def discover(self):
-        return self._transport.send_discovery(self._source, self._nseq())
+        return self._transport.send_discovery(self._source, self._seq)
 
     def poll_devices(self):
         poll_delta = timedelta(seconds=self._devicepolltime - 1)
 
-        for device in filter(lambda x:x.seen_ago() > poll_delta,  self._devices.values()):
+        for device in filter(lambda x:x.seen_ago > poll_delta,  self._devices.values()):
             self._poll_device(device)
 
     def get_devices(self, max_seen=None):
@@ -86,5 +89,5 @@ class Client(object):
 
         seen_delta = timedelta(seconds=max_seen)
 
-        return filter(lambda x:x.seen_ago() < seen_delta, self._devices.values())
+        return filter(lambda x:x.seen_ago < seen_delta, self._devices.values())
 

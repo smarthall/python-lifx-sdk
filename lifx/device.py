@@ -13,12 +13,16 @@ class Device(object):
         # Last seen time
         self._lastseen = datetime.now()
 
-        # Store the client
+        # Handle packets from the client
         self._client = client
+
+    def _packethandler(self, host, port, packet):
+        pass
 
     def _seen(self):
         self._lastseen = datetime.now()
 
+    @property
     def seen_ago(self):
         return datetime.now() - self._lastseen
 
@@ -27,12 +31,14 @@ class Device(object):
         self._services[service] = port
 
     def __repr__(self):
-        return 'Device(MAC:%012x, Seen:%s)' % (self._device_id, self.seen_ago())
+        return 'Device(MAC:%012x, Seen:%s)' % (self._device_id, self.seen_ago)
 
-    def get_host(self):
+    @property
+    def host(self):
         return self._host
 
-    def get_device_id(self):
+    @property
+    def device_id(self):
         return self._device_id
 
     def get_port(self, service_id=protocol.SERVICE_UDP):
