@@ -1,4 +1,5 @@
 from bitstruct import unpack, pack, byteswap, calcsize
+from binascii import hexlify
 from collections import namedtuple
 
 # Packet tuple
@@ -344,6 +345,9 @@ messages = {
         ]),
     },
 }
+
+def mac_string(device_id):
+    return hexlify(byteswap('6', pack('u48', device_id)))
 
 def pack_section(section, *args):
     """Packs bytes into a header including the swap to little-endian"""

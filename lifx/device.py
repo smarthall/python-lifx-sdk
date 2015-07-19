@@ -31,7 +31,7 @@ class Device(object):
         self._services[service] = port
 
     def __repr__(self):
-        return 'Device(MAC:%012x, Seen:%s)' % (self._device_id, self.seen_ago)
+        return 'Device(MAC:%s, Seen:%s)' % (protocol.mac_string(self._device_id), self.seen_ago)
 
     @property
     def host(self):
