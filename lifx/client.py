@@ -52,16 +52,21 @@ class Client(object):
         return seq
 
     def _servicepacket(self, host, port, packet):
-        self._foundservice(host, packet.payload.service, packet.payload.port, packet.frame_address.target)
+        service = packet.payload.service
+        port = packet.payload.port
+        deviceid = packet.frame_address.target
 
-    def _foundservice(self, host, service, port, deviceid):
         if deviceid not in self._devices:
+            # Create a new Device
             new_device = device.Device(deviceid, host, self)
+
+            # Send its own packets to it
             pktfilter = lambda p:(p.frame_address.target == deviceid
                               and p.protocol_header.pkt_type in protocol.CLASS_TYPE_STATE)
-            self._devices[deviceid] = new_device
+            self._transport.register_packet_handler(new_device._packethandler, pktfilter)
 
-        self._devices[deviceid].found_service(service, port)
+            # Store it
+            self._devices[deviceid] = new_device
 
     def _poll_device(self, device):
         return self._transport.send_packet(
