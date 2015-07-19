@@ -48,7 +48,7 @@ class Client(object):
     @property
     def _seq(self):
         seq = self._sequence
-        self._sequence += 1
+        self._sequence = (self._sequence + 1) % pow(2, 8)
         return seq
 
     def _servicepacket(self, host, port, packet):
@@ -57,7 +57,7 @@ class Client(object):
     def _foundservice(self, host, service, port, deviceid):
         if deviceid not in self._devices:
             new_device = device.Device(deviceid, host, self)
-            pktfilter = lambda p:p.frame_address.target == deviceid
+            pktfilter = lambda p:p.frame_address.target == deviceid and p.protocol_header.pkt_type in protocol.CLASS_TYPE_STATE
             self._devices[deviceid] = new_device
 
         self._devices[deviceid].found_service(service, port)
