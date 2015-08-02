@@ -65,19 +65,18 @@ class Client(object):
                               and p.protocol_header.pkt_type in protocol.CLASS_TYPE_STATE)
             self._transport.register_packet_handler(new_device._packethandler, pktfilter)
 
+            # Send the service packet directly to the device
+            new_device._packethandler(host, port, packet)
+
             # Store it
             self._devices[deviceid] = new_device
 
-    def _poll_device(self, device):
+    def send_packet(self, *args, **kwargs):
         return self._transport.send_packet(
-                device.host,
-                device.get_port(protocol.SERVICE_UDP),
-                self._source,
-                device.device_id,
-                False, # No Ack Required
-                True, # Response Required
-                self._seq,
-                protocol.TYPE_GETSERVICE,
+                source=self._source,
+                sequence=self._seq,
+                *args,
+                **kwargs
         )
 
     def discover(self):
@@ -87,7 +86,7 @@ class Client(object):
         poll_delta = timedelta(seconds=self._devicepolltime - 1)
 
         for device in filter(lambda x:x.seen_ago > poll_delta,  self._devices.values()):
-            self._poll_device(device)
+            device.send_poll_packet()
 
     def get_devices(self, max_seen=None):
         if max_seen is None:

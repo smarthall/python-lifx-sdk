@@ -1,6 +1,7 @@
 from datetime import datetime
 import protocol
 from threading import Event
+from colors import HSBK
 
 class Device(object):
     def __init__(self, device_id, host, client):
@@ -17,10 +18,6 @@ class Device(object):
         # For sending packets
         self._client = client
 
-        # Packet Handling
-        self._pkt_event = Event()
-        self._last_pkt = None
-
     def _packethandler(self, host, port, packet):
         self._seen()
 
@@ -28,7 +25,31 @@ class Device(object):
             self._services[packet.payload.service] = packet.payload.port
 
         self._last_pkt = packet
-        self._pkt_event.set()
+
+    def _send_packet(self, *args, **kwargs):
+        """
+        At this point we have most of the required arguments for the packet. The
+        only arguments left that we need are:
+
+        * ack_required
+        * res_required
+        * pkt_type
+        * Arguments for the payload
+        """
+        return self._client.send_packet(
+                address=self.host,
+                port=self.get_port(),
+                target=self._device_id,
+                *args,
+                **kwargs
+        )
+
+    def send_poll_packet(self):
+        return self._send_packet(
+                ack_required=False,
+                res_required=True,
+                pkt_type=protocol.TYPE_GETSERVICE,
+        )
 
     def _seen(self):
         self._lastseen = datetime.now()

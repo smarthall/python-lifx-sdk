@@ -7,6 +7,7 @@ from collections import namedtuple
 DEFAULT_LIFX_PORT = 56700
 
 PacketHandler = namedtuple('PacketHandler', ['handler', 'pktfilter'])
+default_filter = lambda x:True
 
 class NetworkTransport(object):
     """The network transport manages the network sockets and the networking threads"""
@@ -21,7 +22,9 @@ class NetworkTransport(object):
         self._listener = ListenerThread(sock, self._handle_packet)
         self._listener.start()
 
-        self._packet_handlers = []
+        self._packet_handlers = {}
+
+        self._current_handler_id = 0
 
     def _sendto(self, packet, address, port):
         return self._socket.sendto(packet, (address, port))
@@ -33,19 +36,18 @@ class NetworkTransport(object):
     def send_discovery(self, source, sequence, address='255.255.255.255'):
         return self._sendto(protocol.discovery_packet(source, sequence), address, DEFAULT_LIFX_PORT)
 
-    def register_packet_handler(self, handler, pktfilter=None):
-        # If None install all packet handler
-        if pktfilter is None:
-            pktfilter = lambda x:True
+    def register_packet_handler(self, handler, pktfilter=default_filter):
+        # Save handler
+        self._packet_handlers[self._current_handler_id] = PacketHandler(handler, pktfilter)
 
-        h = PacketHandler(handler, pktfilter)
-        self._packet_handlers.append(h)
+        # move to next handler id
+        self._current_handler_id += 1
 
     def _handle_packet(self, address, packet):
-        for handler, pktfilter in self._packet_handlers:
-            if pktfilter(packet):
+        for h in self._packet_handlers.values():
+            if h.pktfilter(packet):
                 host, port = address
-                handler(host, port, packet)
+                h.handler(host, port, packet)
 
 class ListenerThread(threading.Thread):
     """The Listener Thread grabs incoming packets, parses them and forwards them to the right listeners"""
