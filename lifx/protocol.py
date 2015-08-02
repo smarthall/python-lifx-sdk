@@ -2,6 +2,8 @@ from bitstruct import unpack, pack, byteswap, calcsize
 from binascii import hexlify
 from collections import namedtuple
 
+UINT16_MAX = pow(2, 16)
+
 # Packet tuple
 lifx_packet = namedtuple('lifx_packet', ['frame_header', 'frame_address', 'protocol_header', 'payload'])
 
@@ -367,8 +369,16 @@ def section_size(section):
     """Returns the size of a section"""
     return calcsize(section['format'])
 
-def make_packet(source, target, ack_required, res_required, sequence, pkt_type, *args):
+def make_packet(*args, **kwargs):
     """Builds a packet from data supplied, required arguments depends on the packet type"""
+
+    source = kwargs['source']
+    target = kwargs['target']
+    ack_required = kwargs['ack_required']
+    res_required = kwargs['res_required']
+    sequence = kwargs['sequence']
+    pkt_type = kwargs['pkt_type']
+
     # Frame header
     packet_size = ( section_size(frame_header)
            + section_size(frame_address)
@@ -483,5 +493,12 @@ def parse_packet(data):
     )
 
 def discovery_packet(source, sequence):
-    return make_packet(source, 0, False, True, sequence, TYPE_GETSERVICE)
+    return make_packet(
+            source=source,
+            target=0,
+            ack_required=False,
+            res_required=True,
+            sequence=sequence,
+            pkt_type=TYPE_GETSERVICE,
+    )
 

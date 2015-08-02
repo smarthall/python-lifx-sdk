@@ -79,8 +79,9 @@ class Client(object):
         if 'sequence' not in kwargs.keys():
             kwargs['sequence'] = self._seq
 
+        kwargs['source'] = self._source
+
         return self._transport.send_packet(
-                source=self._source,
                 *args,
                 **kwargs
         )

@@ -29,8 +29,16 @@ class NetworkTransport(object):
     def _sendto(self, packet, address, port):
         return self._socket.sendto(packet, (address, port))
 
-    def send_packet(self, address, port, *args, **kwargs):
-        packet = protocol.make_packet(*args, **kwargs)
+    def send_packet(self, *args, **kwargs):
+        # Make the packet
+        packetargs = kwargs.copy()
+        del packetargs['address']
+        del packetargs['port']
+        packet = protocol.make_packet(*args, **packetargs)
+
+        # Send it
+        address = kwargs['address']
+        port = kwargs['port']
         return self._sendto(packet, address, port)
 
     def send_discovery(self, source, sequence, address='255.255.255.255'):

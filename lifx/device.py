@@ -3,6 +3,9 @@ import protocol
 from threading import Event
 import color
 
+DEFAULT_DURATION = 200
+DEFAULT_TIMEOUT = 5
+
 class Device(object):
     def __init__(self, device_id, host, client):
         # Our Device
@@ -53,21 +56,27 @@ class Device(object):
         * pkt_type
         * Arguments for the payload
         """
+
+        kwargs['address'] = self.host
+        kwargs['port'] = self.get_port()
+        kwargs['target'] = self._device_id
+
         return self._client.send_packet(
-                address=self.host,
-                port=self.get_port(),
-                target=self._device_id,
                 *args,
                 **kwargs
         )
 
-    def _block_for_response(self, timeout=5, *args, **kwargs):
+    def _block_for_response(self, *args, **kwargs):
         """
         Send a packet and block waiting for the response, return the response payload.
 
         Only needs the type and an optional payload.
         """
         sequence = self._seq
+        timeout = kwargs.get('timeout', DEFAULT_TIMEOUT)
+
+        e = Event()
+        self._tracked[sequence] = e
 
         self._send_packet(
                 ack_required=False,
@@ -77,11 +86,39 @@ class Device(object):
                 **kwargs
         )
 
-        e = Event()
-        self._tracked[sequence] = e
         e.wait(timeout)
         del self._tracked[sequence]
+
+        # TODO: Check if it was the response we expected
+
         return self._responses[sequence].payload
+
+    def _block_for_ack(self, *args, **kwargs):
+        """
+        Send a packet and block waiting for the acknowledgement
+
+        Only needs the type and an optional payload.
+        """
+        sequence = self._seq
+        timeout = kwargs.get('timeout', DEFAULT_TIMEOUT)
+
+        e = Event()
+        self._tracked[sequence] = e
+
+        self._send_packet(
+                ack_required=True,
+                res_required=False,
+                sequence=sequence,
+                *args,
+                **kwargs
+        )
+
+        e.wait(timeout)
+        del self._tracked[sequence]
+
+        # TODO: Check if the response was actually an ack
+
+        return True
 
     def send_poll_packet(self):
         return self._send_packet(
@@ -128,10 +165,24 @@ class Device(object):
         else:
             return False
 
+    @power.setter
+    def power(self, power):
+        if power:
+            msgpower = protocol.UINT16_MAX
+        else:
+            msgpower = 0
+
+        return self._block_for_ack(msgpower, DEFAULT_DURATION, pkt_type=protocol.TYPE_LIGHT_SETPOWER)
+
     @property
     def color(self):
         response = self._block_for_response(pkt_type=protocol.TYPE_LIGHT_GET)
         return color.color_from_message(response)
+
+#    @color.setter
+#    def color(self, newcolor):
+#        setcolor = setcolor_from_color(newcolor, DEFAULT_DURATION)
+#        return self._block_for_ack(pkt_type=protocol.TYPE_LIGHT_SETCOLOR, payload=setcolor)
 
     @property
     def colour(self):
