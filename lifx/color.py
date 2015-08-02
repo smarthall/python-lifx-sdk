@@ -6,7 +6,7 @@ KELVIN_MIN = 2500
 KELVIN_MAX = 9000
 KELVIN_RANGE = KELVIN_MAX - KELVIN_MIN
 
-MID_KELVIN = 5750
+MID_KELVIN = KELVIN_MIN + (KELVIN_RANGE/2)
 
 HSBK = namedtuple('HSBK', ['hue', 'saturation', 'brightness', 'kelvin'])
 
@@ -24,7 +24,7 @@ def color_from_message(state):
     hue = float(state.hue) / protocol.UINT16_MAX * HUE_MAX
     saturation = float(state.saturation) / protocol.UINT16_MAX
     brightness = float(state.brightness) / protocol.UINT16_MAX
-    kelvin = float(state.kelvin) / protocol.UINT16_MAX * KELVIN_RANGE + KELVIN_MIN
+    kelvin = int(state.kelvin)
 
     return HSBK(hue, saturation, brightness, kelvin)
 
@@ -32,7 +32,7 @@ def message_from_color(hsbk):
     msghue = int(float(hsbk.hue) / HUE_MAX * protocol.UINT16_MAX)
     msgsat = int(float(hsbk.saturation) * protocol.UINT16_MAX)
     msgbrt = int(float(hsbk.brightness) * protocol.UINT16_MAX)
-    msgkvn = int((float(hsbk.kelvin) - KELVIN_MIN) / KELVIN_RANGE * protocol.UINT16_MAX)
+    msgkvn = int(hsbk.kelvin) % (protocol.UINT16_MAX + 1)
 
     return HSBK(msghue, msgsat, msgbrt, msgkvn)
 
