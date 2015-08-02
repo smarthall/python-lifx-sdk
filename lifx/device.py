@@ -177,10 +177,18 @@ class Device(object):
         response = self._block_for_response(pkt_type=protocol.TYPE_LIGHT_GET)
         return color.color_from_message(response)
 
-#    @color.setter
-#    def color(self, newcolor):
-#        setcolor = setcolor_from_color(newcolor, DEFAULT_DURATION)
-#        return self._block_for_ack(pkt_type=protocol.TYPE_LIGHT_SETCOLOR, payload=setcolor)
+    @color.setter
+    def color(self, newcolor):
+        colormsg = color.message_from_color(newcolor)
+        return self._block_for_ack(
+                0,
+                colormsg.hue,
+                colormsg.saturation,
+                colormsg.brightness,
+                colormsg.kelvin,
+                DEFAULT_DURATION,
+                pkt_type=protocol.TYPE_LIGHT_SETCOLOR
+        )
 
     @property
     def colour(self):
@@ -188,6 +196,13 @@ class Device(object):
         For us aussies. :D
         """
         return self.color
+
+    @colour.setter
+    def colour(self, newcolour):
+        """
+        For us aussies. :D
+        """
+        self.color = newcolour
 
     def power_toggle(self):
         self.power = not self.power
