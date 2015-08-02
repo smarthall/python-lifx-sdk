@@ -45,6 +45,9 @@ class Client(object):
     def __del__():
         self._discoverpoll.cancel()
 
+    def __repr__(self):
+        return repr(self.get_devices())
+
     @property
     def _seq(self):
         seq = self._sequence
@@ -97,5 +100,11 @@ class Client(object):
 
         seen_delta = timedelta(seconds=max_seen)
 
-        return filter(lambda x:x.seen_ago < seen_delta, self._devices.values())
+        devices = filter(lambda x:x.seen_ago < seen_delta, self._devices.values())
+
+        # Sort by device id to ensure consistent ordering
+        return sorted(devices, key=lambda k:k.device_id)
+
+    def __getitem__(self, key):
+        return self.get_devices()[key]
 
