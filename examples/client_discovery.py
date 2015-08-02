@@ -17,6 +17,8 @@ while True:
     # Give some time for discovery
     time.sleep(1)
     
-    # Print what was discovered
-    print lights.get_devices()
+    # Print results
+    print '---- DEVICES ----'
+    for i in lights.get_devices():
+        print lights.label
 
