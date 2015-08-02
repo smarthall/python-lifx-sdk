@@ -189,3 +189,6 @@ class Device(object):
         """
         return self.color
 
+    def power_toggle(self):
+        self.power = not self.power
+
