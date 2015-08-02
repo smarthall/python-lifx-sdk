@@ -1,7 +1,7 @@
 from datetime import datetime
 import protocol
 from threading import Event
-from colors import HSBK
+import color
 
 class Device(object):
     def __init__(self, device_id, host, client):
@@ -94,7 +94,7 @@ class Device(object):
         self._lastseen = datetime.now()
 
     def __repr__(self):
-        return 'Device(MAC:%s, Seen:%s)' % (protocol.mac_string(self._device_id), self.seen_ago)
+        return 'Device(MAC:%s, Label:%s)' % (protocol.mac_string(self._device_id), self.label)
 
     def get_port(self, service_id=protocol.SERVICE_UDP):
         return self._services[service_id]
@@ -119,4 +119,24 @@ class Device(object):
     def label(self):
         response = self._block_for_response(pkt_type=protocol.TYPE_GETLABEL)
         return response.label.decode('UTF-8')
+
+    @property
+    def power(self):
+        response = self._block_for_response(pkt_type=protocol.TYPE_GETPOWER)
+        if response.level > 0:
+            return True
+        else:
+            return False
+
+    @property
+    def color(self):
+        response = self._block_for_response(pkt_type=protocol.TYPE_LIGHT_GET)
+        return color.color_from_message(response)
+
+    @property
+    def colour(self):
+        """
+        For us aussies. :D
+        """
+        return self.color
 

@@ -1,20 +1,7 @@
-import socket
 import signal
 import sys
-import code
-import lifx.protocol
-import lifx.network
-
-# Start listening for packets
-net = lifx.network.NetworkTransport()
-
-# Install a packet handler
-def packet_handler(host, port, packet):
-    print '---'
-    print 'Packet from: %s:%s' % (host, port)
-    print 'Parsed: ' + str(packet)
-
-net.register_packet_handler(packet_handler)
+import time
+import lifx.client
 
 # Install a signal handler
 def signal_handler(signal, frame):
@@ -23,9 +10,15 @@ def signal_handler(signal, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
-# Send a discovery packet (expecting replies)
-net.send_discovery(1, 0)
+# Start the client
+lights = lifx.client.Client()
 
-# Wait for CTRL-C
-signal.pause()
+while True:
+    # Give some time for discovery
+    time.sleep(1)
+    
+    # Print results
+    print '---- DEVICES ----'
+    for i in lights.get_devices():
+        print i.label
 
