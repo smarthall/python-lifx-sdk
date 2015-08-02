@@ -2,7 +2,7 @@ from bitstruct import unpack, pack, byteswap, calcsize
 from binascii import hexlify
 from collections import namedtuple
 
-UINT16_MAX = pow(2, 16)
+UINT16_MAX = pow(2, 16) - 1
 
 # Packet tuple
 lifx_packet = namedtuple('lifx_packet', ['frame_header', 'frame_address', 'protocol_header', 'payload'])

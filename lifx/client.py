@@ -64,8 +64,12 @@ class Client(object):
             new_device = device.Device(deviceid, host, self)
 
             # Send its own packets to it
-            pktfilter = lambda p:(p.frame_address.target == deviceid
-                              and p.protocol_header.pkt_type in protocol.CLASS_TYPE_STATE)
+            pktfilter = lambda p:(
+                    p.frame_address.target == deviceid
+                    and (
+                        p.protocol_header.pkt_type == protocol.TYPE_ACKNOWLEDGEMENT
+                        or p.protocol_header.pkt_type in protocol.CLASS_TYPE_STATE
+                    ))
             self._transport.register_packet_handler(new_device._packethandler, pktfilter)
 
             # Send the service packet directly to the device

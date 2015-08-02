@@ -18,9 +18,6 @@ class Device(object):
         # Last seen time
         self._lastseen = datetime.now()
 
-        # Messages sent via devices have a device-specific sequence number
-        self._sequence = 0
-
         # For sending packets
         self._client = client
 
@@ -30,13 +27,12 @@ class Device(object):
 
     @property
     def _seq(self):
-        seq = self._sequence
-        self._sequence = (self._sequence + 1) % pow(2, 8)
-        return seq
+        return self._client._seq
 
     def _packethandler(self, host, port, packet):
         self._seen()
 
+        # If it was a service packet
         if packet.protocol_header.pkt_type == protocol.TYPE_STATESERVICE:
             self._services[packet.payload.service] = packet.payload.port
 
@@ -90,6 +86,7 @@ class Device(object):
         del self._tracked[sequence]
 
         # TODO: Check if it was the response we expected
+        # TODO: Retransmissions
 
         return self._responses[sequence].payload
 
@@ -113,10 +110,11 @@ class Device(object):
                 **kwargs
         )
 
-        e.wait(timeout)
+        res = e.wait(timeout)
         del self._tracked[sequence]
 
         # TODO: Check if the response was actually an ack
+        # TODO: Retransmissions
 
         return True
 
