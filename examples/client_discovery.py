@@ -20,5 +20,5 @@ while True:
     # Print results
     print '---- DEVICES ----'
     for i in lights.get_devices():
-        print lights.label
+        print i.label
 

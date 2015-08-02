@@ -72,9 +72,12 @@ class Client(object):
             self._devices[deviceid] = new_device
 
     def send_packet(self, *args, **kwargs):
+        # Add a sequence number if a higher layer didnt
+        if 'sequence' not in kwargs.keys():
+            kwargs['sequence'] = self._seq
+
         return self._transport.send_packet(
                 source=self._source,
-                sequence=self._seq,
                 *args,
                 **kwargs
         )

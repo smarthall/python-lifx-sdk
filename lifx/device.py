@@ -15,12 +15,21 @@ class Device(object):
         # Last seen time
         self._lastseen = datetime.now()
 
+        # Messages sent via devices have a device-specific sequence number
+        self._sequence = 0
+
         # For sending packets
         self._client = client
 
         # Tools for tracking responses
         self._tracked = {}
         self._responses = {}
+
+    @property
+    def _seq(self):
+        seq = self._sequence
+        self._sequence = (self._sequence + 1) % pow(2, 8)
+        return seq
 
     def _packethandler(self, host, port, packet):
         self._seen()
@@ -58,14 +67,15 @@ class Device(object):
 
         Only needs the type and an optional payload.
         """
+        sequence = self._seq
+
         self._send_packet(
                 ack_required=False,
                 res_required=True,
+                sequence=sequence,
                 *args,
                 **kwargs
         )
-
-        sequence = kwargs['sequence']
 
         e = Event()
         self._tracked[sequence] = e
@@ -107,5 +117,6 @@ class Device(object):
 
     @property
     def label(self):
-        return self._block_for_response(pkt_type=protocol.TYPE_GETLABEL)
+        response = self._block_for_response(pkt_type=protocol.TYPE_GETLABEL)
+        return response.label.decode('UTF-8')
 
