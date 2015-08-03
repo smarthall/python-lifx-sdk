@@ -19,6 +19,10 @@ BLUE = HSBK(240, 1, 1, MID_KELVIN)
 PURPLE = HSBK(300, 1, 1, MID_KELVIN)
 WHITE = HSBK(0, 0, 1, MID_KELVIN)
 
+# Whites
+COOL_WHITE = HSBK(0, 0, 1, KELVIN_MAX)
+WARM_WHITE = HSBK(0, 0, 1, KELVIN_MIN)
+
 
 def color_from_message(state):
     hue = float(state.hue) / protocol.UINT16_MAX * HUE_MAX
