@@ -155,6 +155,14 @@ class Device(object):
         response = self._block_for_response(pkt_type=protocol.TYPE_GETLABEL)
         return response.label.decode('UTF-8')
 
+    def fade_power(self, power, duration=DEFAULT_DURATION):
+        if power:
+            msgpower = protocol.UINT16_MAX
+        else:
+            msgpower = 0
+
+        return self._block_for_ack(msgpower, duration, pkt_type=protocol.TYPE_LIGHT_SETPOWER)
+
     @property
     def power(self):
         response = self._block_for_response(pkt_type=protocol.TYPE_GETPOWER)
@@ -165,12 +173,7 @@ class Device(object):
 
     @power.setter
     def power(self, power):
-        if power:
-            msgpower = protocol.UINT16_MAX
-        else:
-            msgpower = 0
-
-        return self._block_for_ack(msgpower, DEFAULT_DURATION, pkt_type=protocol.TYPE_LIGHT_SETPOWER)
+        self.fade_power(power)
 
     @property
     def color(self):
