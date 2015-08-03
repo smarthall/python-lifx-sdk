@@ -13,6 +13,12 @@ setup(
         'bitstruct==1.0.0',
     ],
 
+    # Tests
+    test_suite="nose.collector",
+    tests_require = [
+        'nose',
+    ],
+
     # Metadata for PyPI
     description='An SDK for local LAN control of bulbs, using Python',
     author='Daniel Hall',
