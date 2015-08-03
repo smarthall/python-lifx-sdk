@@ -3,6 +3,7 @@ from binascii import hexlify
 from collections import namedtuple
 
 UINT16_MAX = pow(2, 16) - 1
+LABEL_MAXLEN = 32
 
 # Packet tuple
 lifx_packet = namedtuple('lifx_packet', ['frame_header', 'frame_address', 'protocol_header', 'payload'])
@@ -350,6 +351,10 @@ messages = {
 
 def mac_string(device_id):
     return hexlify(byteswap('6', pack('u48', device_id)))
+
+def bytes_to_label(label_bytes):
+    strlen = label_bytes.find('\x00')
+    return label_bytes[0:strlen].decode('utf-8')
 
 def pack_section(section, *args):
     """Packs bytes into a header including the swap to little-endian"""

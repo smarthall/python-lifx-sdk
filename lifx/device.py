@@ -153,7 +153,13 @@ class Device(object):
     @property
     def label(self):
         response = self._block_for_response(pkt_type=protocol.TYPE_GETLABEL)
-        return response.label.decode('UTF-8')
+        return protocol.bytes_to_label(response.label)
+
+    @label.setter
+    def label(self, label):
+        newlabel = bytearray(label.encode('utf-8')[0:protocol.LABEL_MAXLEN])
+
+        return self._block_for_ack(newlabel, pkt_type=protocol.TYPE_SETLABEL)
 
     def fade_power(self, power, duration=DEFAULT_DURATION):
         if power:
@@ -162,6 +168,9 @@ class Device(object):
             msgpower = 0
 
         return self._block_for_ack(msgpower, duration, pkt_type=protocol.TYPE_LIGHT_SETPOWER)
+
+    def power_toggle(self, duration=DEFAULT_DURATION):
+        self.fade_power(not self.power, duration)
 
     @property
     def power(self):
@@ -175,13 +184,7 @@ class Device(object):
     def power(self, power):
         self.fade_power(power)
 
-    @property
-    def color(self):
-        response = self._block_for_response(pkt_type=protocol.TYPE_LIGHT_GET)
-        return color.color_from_message(response)
-
-    @color.setter
-    def color(self, newcolor):
+    def fade_color(self, newcolor, duration=DEFAULT_DURATION):
         colormsg = color.message_from_color(newcolor)
         return self._block_for_ack(
                 0,
@@ -189,24 +192,16 @@ class Device(object):
                 colormsg.saturation,
                 colormsg.brightness,
                 colormsg.kelvin,
-                DEFAULT_DURATION,
+                duration,
                 pkt_type=protocol.TYPE_LIGHT_SETCOLOR
         )
 
     @property
-    def colour(self):
-        """
-        For us aussies. :D
-        """
-        return self.color
+    def color(self):
+        response = self._block_for_response(pkt_type=protocol.TYPE_LIGHT_GET)
+        return color.color_from_message(response)
 
-    @colour.setter
-    def colour(self, newcolour):
-        """
-        For us aussies. :D
-        """
-        self.color = newcolour
-
-    def power_toggle(self):
-        self.power = not self.power
+    @color.setter
+    def color(self, newcolor):
+        self.fade_color(newcolor)
 
