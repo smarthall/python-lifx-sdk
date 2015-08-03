@@ -386,7 +386,7 @@ def make_packet(*args, **kwargs):
            + section_size(messages[pkt_type]) ) / 8
 
     origin = 0 # Origin is always zero
-    tagged = 1 if target is not None else 0
+    tagged = 1 if target is None else 0
     addressable = 1 # Addressable is always one
     protocol = 1024 # Only protocol 1024 so far
 
@@ -401,7 +401,7 @@ def make_packet(*args, **kwargs):
     )
 
     # Frame Address
-    target = 0 if target is not None else target
+    target = 0 if target is None else target
     res_required = 1 if res_required else 0
     ack_required = 1 if ack_required else 0
 
@@ -495,7 +495,7 @@ def parse_packet(data):
 def discovery_packet(source, sequence):
     return make_packet(
             source=source,
-            target=0,
+            target=None,
             ack_required=False,
             res_required=True,
             sequence=sequence,
