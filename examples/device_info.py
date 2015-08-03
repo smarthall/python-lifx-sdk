@@ -1,7 +1,7 @@
 import signal
 import sys
 import time
-import lifx.client
+import lifx
 
 # Install a signal handler
 def signal_handler(signal, frame):
@@ -11,7 +11,7 @@ def signal_handler(signal, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 # Start the client
-lights = lifx.client.Client()
+lights = lifx.Client()
 
 # Give some time for discovery
 time.sleep(1)

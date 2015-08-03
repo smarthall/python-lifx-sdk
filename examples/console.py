@@ -1,10 +1,10 @@
 import readline
 import code
 import time
-import lifx.client
+import lifx
 
 # Start the client
-lights = lifx.client.Client()
+lights = lifx.Client()
 
 # Start interactive console
 print 'Use the "lights" variable to use the SDK'
