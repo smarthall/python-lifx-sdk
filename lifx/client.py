@@ -10,9 +10,9 @@ import util
 MISSED_POLLS = 3
 
 class Client(object):
-    def __init__(self, address='0.0.0.0', discoverpoll=60, devicepoll=5):
+    def __init__(self, broadcast='255.255.255.255', address='0.0.0.0', discoverpoll=60, devicepoll=5):
         # Get Transport
-        self._transport = network.NetworkTransport(address)
+        self._transport = network.NetworkTransport(address=address, broadcast=broadcast)
 
         # Arguments
         self._discoverpolltime = discoverpoll
@@ -42,7 +42,7 @@ class Client(object):
         self._devicepoll.daemon = True
         self._devicepoll.start()
 
-    def __del__():
+    def __del__(self):
         self._discoverpoll.cancel()
 
     def __repr__(self):

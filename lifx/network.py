@@ -11,7 +11,7 @@ default_filter = lambda x:True
 
 class NetworkTransport(object):
     """The network transport manages the network sockets and the networking threads"""
-    def __init__(self, address='0.0.0.0'):
+    def __init__(self, address='0.0.0.0', broadcast='255.255.255.255'):
         # Prepare a socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
@@ -25,6 +25,8 @@ class NetworkTransport(object):
         self._packet_handlers = {}
 
         self._current_handler_id = 0
+
+        self._broadcast = broadcast
 
     def _sendto(self, packet, address, port):
         return self._socket.sendto(packet, (address, port))
@@ -41,8 +43,8 @@ class NetworkTransport(object):
         port = kwargs['port']
         return self._sendto(packet, address, port)
 
-    def send_discovery(self, source, sequence, address='255.255.255.255'):
-        return self._sendto(protocol.discovery_packet(source, sequence), address, DEFAULT_LIFX_PORT)
+    def send_discovery(self, source, sequence):
+        return self._sendto(protocol.discovery_packet(source, sequence), self._broadcast, DEFAULT_LIFX_PORT)
 
     def register_packet_handler(self, handler, pktfilter=default_filter):
         # Save handler
