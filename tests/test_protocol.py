@@ -9,6 +9,13 @@ MAC_TEST_CASES = [
         (pow(2, 6*8) - 1, 'ffffffffffff'), # Maximum
 ]
 
+BYTES_TO_LABEL_CASES = [
+        (bytearray(b'Right \xe2\x86\x97\xef\xb8\x8f\x00'), u'Right \u2197\ufe0f'),
+        (bytearray(b'\x00'), u''),
+        (bytearray(b'Just Text\x00'), u'Just Text'),
+        (bytearray(b'\x00AFTER_NULL'), u''),
+]
+
 PACK_TEST_CASES = [
         (lifx.protocol.frame_header,     (0, 0, 0, 0, 0, 0,),          '0000000000000000'),
         (lifx.protocol.frame_header,     (49, 0, 1, 1, 1024, 4752,),   '3100003490120000'),
@@ -46,6 +53,10 @@ class ProtocolTests(unittest.TestCase):
         for val, mac in MAC_TEST_CASES:
             self.assertEqual(lifx.protocol.mac_string(val), mac)
 
+    def test_bytes_to_label(self):
+        for val, string in BYTES_TO_LABEL_CASES:
+            self.assertEqual(lifx.protocol.bytes_to_label(val), string)
+
     def test_pack_section(self):
         for pack_type, args, packet in PACK_TEST_CASES:
             self.assertEqual(hexlify(lifx.protocol.pack_section(pack_type, *args)), packet)
@@ -80,6 +91,16 @@ class ProtocolTests(unittest.TestCase):
 
             # Check other data
             self.assertEqual(parsed.frame_header.tagged, vals['tagged'])
+
+    def test_parse_packet_with_incorrect_size(self):
+        packet = '240000142d000000d073d5017c0400000000000000000161000000000000000014'
+        self.assertIsNone(lifx.protocol.parse_packet(unhexlify(packet)))
+
+    def test_parse_packet_with_unknown_type(self):
+        packet = '2600005442524b52d073d501cf2c00004c49465856320000842e3128d92cf7136f000000890c'
+        parsed = lifx.protocol.parse_packet(unhexlify(packet))
+        self.assertEqual(parsed.protocol_header.pkt_type, 111)
+        self.assertEqual(parsed.payload, '\x89\x0c')
 
     def test_discovery_packet(self):
         self.assertEqual(
