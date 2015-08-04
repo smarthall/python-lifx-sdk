@@ -110,6 +110,15 @@ class Client(object):
         # Sort by device id to ensure consistent ordering
         return sorted(devices, key=lambda k:k.device_id)
 
+    def by_label(self, label):
+        return filter(lambda d: d.label == label, self.get_devices())
+
+    def by_id(self, id):
+        return filter(lambda d: d.device_id == id, self.get_devices())[0]
+
+    def by_power(self, power):
+        return filter(lambda d: d.power == power, self.get_devices())
+
     def __getitem__(self, key):
         return self.get_devices()[key]
 
