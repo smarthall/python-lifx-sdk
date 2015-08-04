@@ -350,18 +350,41 @@ messages = {
 }
 
 def mac_string(device_id):
+    """
+    Converts a device id into a mac address hex string
+
+    :param device_id: The device id
+    :returns: str -- The mac address represented as a string
+    """
     return hexlify(byteswap('6', pack('u48', device_id)))
 
 def bytes_to_label(label_bytes):
+    """
+    Takes the bytes from a TYPE_STATELABEL packet removes the NUL char and
+    and everything after, then converts it to unicode.
+
+    :param label_bytes: The bytes from the TYPE_STATELABEL packet
+    :returns: unicode -- The label of the device
+    """
     strlen = label_bytes.find('\x00')
     return label_bytes[0:strlen].decode('utf-8')
 
 def pack_section(section, *args):
-    """Packs bytes into a header including the swap to little-endian"""
+    """
+    Packs bytes into a header including the swap to little-endian
+
+    :param section: The definition of the format and byteswap for this section
+    :param *args: Values to include in the section in the order they are in the format
+    """
     return byteswap(section['byteswap'], pack(section['format'], *args))
 
 def unpack_section(section, data):
-    """Unpacks bytes into data, including the endian swap"""
+    """
+    Unpacks bytes into data, including the endian swap
+
+    :param section: The definition of the format, byteswap and namedtuple for this section
+    :param data: The bytes to unpack into the tuple
+    """
 
     # Bitstruct only takes byte arrays, some things give us strings
     if type(data) != bytearray:
@@ -371,11 +394,17 @@ def unpack_section(section, data):
     return section['fields'](*unpacked)
 
 def section_size(section):
-    """Returns the size of a section"""
+    """
+    Returns the size of a section
+
+    :param section: The definition of the format for this section
+    """
     return calcsize(section['format'])
 
 def make_packet(*args, **kwargs):
-    """Builds a packet from data supplied, required arguments depends on the packet type"""
+    """
+    Builds a packet from data supplied, required arguments depends on the packet type
+    """
 
     source = kwargs['source']
     target = kwargs['target']
@@ -440,7 +469,12 @@ def make_packet(*args, **kwargs):
 
 
 def parse_packet(data):
-    """Takes packet data as composes it into several namedtuple objects"""
+    """
+    Takes packet data as composes it into several namedtuple objects
+
+    :param data: Byte data for the packet to be parsed
+    :return namedtuple -- A named tuple representing the packet, with nested namedtuples for each header and the payload
+    """
     # Frame Header
     frame_header_size = section_size(frame_header) / 8
     frame_header_data = data[0:frame_header_size]
@@ -498,6 +532,12 @@ def parse_packet(data):
     )
 
 def discovery_packet(source, sequence):
+    """
+    Helper function for building a discovery packet easily
+
+    :param source: The source field to put into the frame header
+    :param sequence: The wrap around sequence number for the frame address header
+    """
     return make_packet(
             source=source,
             target=None,
