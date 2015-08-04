@@ -10,11 +10,11 @@ class UtilTests(unittest.TestCase):
 
         trigger.counter = 0
 
-        timer = RepeatTimer(1, trigger)
+        timer = RepeatTimer(0.005, trigger)
         timer.start()
 
-        time.sleep(4)
+        time.sleep(0.04)
         timer.cancel()
 
-        self.assertGreaterEqual(trigger.counter, 3)
+        self.assertGreaterEqual(trigger.counter, 6)
 
