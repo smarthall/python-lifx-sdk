@@ -130,7 +130,7 @@ class Device(object):
         self._lastseen = datetime.now()
 
     def __repr__(self):
-        return 'Device(MAC:%s, Label:%s)' % (protocol.mac_string(self._device_id), self.label)
+        return u'Device(MAC:%s, Label:%s)' % (protocol.mac_string(self._device_id), repr(self.label))
 
     def get_port(self, service_id=protocol.SERVICE_UDP):
         return self._services[service_id]
