@@ -1,6 +1,7 @@
 from datetime import datetime
 import protocol
 from threading import Event
+from lifx.color import modify_color
 import color
 
 DEFAULT_DURATION = 200
@@ -204,4 +205,37 @@ class Device(object):
     @color.setter
     def color(self, newcolor):
         self.fade_color(newcolor)
+
+    # Helpers to change the color on the bulb
+    @property
+    def hue(self):
+        return self.color.hue
+
+    @hue.setter
+    def hue(self, hue):
+        self.color = modify_color(self.color, hue=hue)
+
+    @property
+    def saturation(self):
+        return self.color.saturation
+
+    @saturation.setter
+    def saturation(self, saturation):
+        self.color = modify_color(self.color, saturation=saturation)
+
+    @property
+    def brightness(self):
+        return self.color.brightness
+
+    @brightness.setter
+    def brightness(self, brightness):
+        self.color = modify_color(self.color, brightness=brightness)
+
+    @property
+    def kelvin(self):
+        return self.color.kelvin
+
+    @kelvin.setter
+    def kelvin(self, kelvin):
+        self.color = modify_color(self.color, kelvin=kelvin)
 
