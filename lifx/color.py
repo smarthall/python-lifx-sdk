@@ -40,3 +40,6 @@ def message_from_color(hsbk):
 
     return HSBK(msghue, msgsat, msgbrt, msgkvn)
 
+def modify_color(hsbk, **kwargs):
+    return hsbk._replace(**kwargs)
+
