@@ -120,6 +120,11 @@ class Device(object):
         return True
 
     def send_poll_packet(self):
+        """
+        Send a poll packet to the device, without waiting for a response. The
+        response will be received later and will update the time we last saw
+        the bulb.
+        """
         return self._send_packet(
                 ack_required=False,
                 res_required=True,
@@ -133,26 +138,46 @@ class Device(object):
         return u'Device(MAC:%s, Label:%s)' % (protocol.mac_string(self._device_id), repr(self.label))
 
     def get_port(self, service_id=protocol.SERVICE_UDP):
+        """
+        Get the port for a service, by default the UDP service.
+
+        :param service_id: The service whose port we are fetching.
+        """
         return self._services[service_id]
 
     @property
     def udp_port(self):
+        """
+        The port of the UDP service. Read Only.
+        """
         return self.get_port(protocol.SERVICE_UDP)
 
     @property
     def seen_ago(self):
+        """
+        The time in seconds since we last saw a packet from the device. Read Only.
+        """
         return datetime.now() - self._lastseen
 
     @property
     def host(self):
+        """
+        The ip address of the device. Read Only.
+        """
         return self._host
 
     @property
     def device_id(self):
+        """
+        The device id. Read Only.
+        """
         return self._device_id
 
     @property
     def label(self):
+        """
+        The label for the device, setting this will change the label on the device.
+        """
         response = self._block_for_response(pkt_type=protocol.TYPE_GETLABEL)
         return protocol.bytes_to_label(response.label)
 
@@ -163,6 +188,12 @@ class Device(object):
         return self._block_for_ack(newlabel, pkt_type=protocol.TYPE_SETLABEL)
 
     def fade_power(self, power, duration=DEFAULT_DURATION):
+        """
+        Transition to another power state slowly.
+
+        :param power: The new power state
+        :param duration: The number of milliseconds to perform the transition over.
+        """
         if power:
             msgpower = protocol.UINT16_MAX
         else:
@@ -171,10 +202,18 @@ class Device(object):
         return self._block_for_ack(msgpower, duration, pkt_type=protocol.TYPE_LIGHT_SETPOWER)
 
     def power_toggle(self, duration=DEFAULT_DURATION):
+        """
+        Transition to the opposite power state slowly.
+
+        :param duration: The number of milliseconds to perform the transition over.
+        """
         self.fade_power(not self.power, duration)
 
     @property
     def power(self):
+        """
+        The power state of the device. Set to False to turn of and True to turn on.
+        """
         response = self._block_for_response(pkt_type=protocol.TYPE_GETPOWER)
         if response.level > 0:
             return True
@@ -186,6 +225,12 @@ class Device(object):
         self.fade_power(power)
 
     def fade_color(self, newcolor, duration=DEFAULT_DURATION):
+        """
+        Transition the light to a new color.
+
+        :param newcolor: The HSBK tuple of the new color to transition to
+        :param duration: The number of milliseconds to perform the transition over.
+        """
         colormsg = color.message_from_color(newcolor)
         return self._block_for_ack(
                 0,
@@ -199,6 +244,10 @@ class Device(object):
 
     @property
     def color(self):
+        """
+        The color the device is currently set to. Set this value to change the
+        color of the bulb all at once.
+        """
         response = self._block_for_response(pkt_type=protocol.TYPE_LIGHT_GET)
         return color.color_from_message(response)
 
@@ -209,6 +258,10 @@ class Device(object):
     # Helpers to change the color on the bulb
     @property
     def hue(self):
+        """
+        The hue value of the color the bulb is set to. Set this to alter only
+        the Hue.
+        """
         return self.color.hue
 
     @hue.setter
@@ -217,6 +270,10 @@ class Device(object):
 
     @property
     def saturation(self):
+        """
+        The saturation value the bulb is currently set to. Set this to alter
+        only the saturation.
+        """
         return self.color.saturation
 
     @saturation.setter
@@ -225,6 +282,10 @@ class Device(object):
 
     @property
     def brightness(self):
+        """
+        The brightness value the bulb is currently set to. Set this to alter
+        only the current brightness of the bulb.
+        """
         return self.color.brightness
 
     @brightness.setter
@@ -233,6 +294,10 @@ class Device(object):
 
     @property
     def kelvin(self):
+        """
+        The kelvin value the bulb is currently set to. Set this to alter
+        only the current kelvin of the bulb.
+        """
         return self.color.kelvin
 
     @kelvin.setter

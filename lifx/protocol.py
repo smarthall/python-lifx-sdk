@@ -374,7 +374,8 @@ def pack_section(section, *args):
     Packs bytes into a header including the swap to little-endian
 
     :param section: The definition of the format and byteswap for this section
-    :param *args: Values to include in the section in the order they are in the format
+    :param \*args: Values to include in the section in the order they are in the format
+    :returns: bytearray -- The packed bytes of the section
     """
     return byteswap(section['byteswap'], pack(section['format'], *args))
 
@@ -384,6 +385,7 @@ def unpack_section(section, data):
 
     :param section: The definition of the format, byteswap and namedtuple for this section
     :param data: The bytes to unpack into the tuple
+    :returns: namedtuple -- A namedtuple containing the data from the section
     """
 
     # Bitstruct only takes byte arrays, some things give us strings
@@ -398,6 +400,7 @@ def section_size(section):
     Returns the size of a section
 
     :param section: The definition of the format for this section
+    :returns: int -- An integer representing the size in bits of the section
     """
     return calcsize(section['format'])
 
@@ -473,7 +476,7 @@ def parse_packet(data):
     Takes packet data as composes it into several namedtuple objects
 
     :param data: Byte data for the packet to be parsed
-    :return namedtuple -- A named tuple representing the packet, with nested namedtuples for each header and the payload
+    :returns: namedtuple -- A named tuple representing the packet, with nested namedtuples for each header and the payload
     """
     # Frame Header
     frame_header_size = section_size(frame_header) / 8
@@ -537,6 +540,7 @@ def discovery_packet(source, sequence):
 
     :param source: The source field to put into the frame header
     :param sequence: The wrap around sequence number for the frame address header
+    :returns: bytearray -- The discovery packet represented as bytes
     """
     return make_packet(
             source=source,

@@ -25,6 +25,12 @@ WARM_WHITE = HSBK(0, 0, 1, KELVIN_MIN)
 
 
 def color_from_message(state):
+    """
+    Translates values from a packet into actual color values
+
+    :param state: The state data from the light state message
+    :returns: HSBK -- The actual color values
+    """
     hue = float(state.hue) / protocol.UINT16_MAX * HUE_MAX
     saturation = float(state.saturation) / protocol.UINT16_MAX
     brightness = float(state.brightness) / protocol.UINT16_MAX
@@ -33,6 +39,12 @@ def color_from_message(state):
     return HSBK(hue, saturation, brightness, kelvin)
 
 def message_from_color(hsbk):
+    """
+    Translates values from a color to values suitable for the packet.
+
+    :param hsbk: The data from the actual color
+    :returns: HSBK -- Color values for a light state message
+    """
     msghue = int(float(hsbk.hue) / HUE_MAX * protocol.UINT16_MAX)
     msgsat = int(float(hsbk.saturation) * protocol.UINT16_MAX)
     msgbrt = int(float(hsbk.brightness) * protocol.UINT16_MAX)
@@ -41,5 +53,14 @@ def message_from_color(hsbk):
     return HSBK(msghue, msgsat, msgbrt, msgkvn)
 
 def modify_color(hsbk, **kwargs):
+    """
+    Helper function to make new colors from an existing color by modifying it.
+
+    :param hsbk: The base color
+    :param hue: The new Hue value (optional)
+    :param saturation: The new Saturation value (optional)
+    :param brightness: The new Brightness value (optional)
+    :param kelvin: The new Kelvin value (optional)
+    """
     return hsbk._replace(**kwargs)
 

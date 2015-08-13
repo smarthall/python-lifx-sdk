@@ -10,7 +10,18 @@ import util
 MISSED_POLLS = 3
 
 class Client(object):
-    def __init__(self, broadcast='255.255.255.255', address='0.0.0.0', discoverpoll=60, devicepoll=5):
+    def __init__(self, broadcast='255.255.255.255', address='0.0.0.0', discoverpoll=60, devicepoll=20):
+        """
+        The Client object is responsible for discovering lights and managing
+        incoming and outgoing packets. This is the class most people will use to
+        interact with the lights.
+
+        :param broadcast: The address to broadcast to when discovering devices.
+        :param address: The address to receive packet on.
+        :param discoverpoll: The time in second between attempts to discover new bulbs.
+        :param devicepoll: The time is seconds between polls to check if devices still respond.
+        """
+
         # Get Transport
         self._transport = network.NetworkTransport(address=address, broadcast=broadcast)
 
@@ -79,6 +90,10 @@ class Client(object):
             self._devices[deviceid] = new_device
 
     def send_packet(self, *args, **kwargs):
+        """
+        Sends a packet to a device. The client fills in the sequence and source
+        parameters then calls the transport's packet send_packet.
+        """
         # Add a sequence number if a higher layer didnt
         if 'sequence' not in kwargs.keys():
             kwargs['sequence'] = self._seq
@@ -91,15 +106,26 @@ class Client(object):
         )
 
     def discover(self):
+        """
+        Perform device discovery now.
+        """
         return self._transport.send_discovery(self._source, self._seq)
 
     def poll_devices(self):
+        """
+        Poll all devices right now.
+        """
         poll_delta = timedelta(seconds=self._devicepolltime - 1)
 
         for device in filter(lambda x:x.seen_ago > poll_delta,  self._devices.values()):
             device.send_poll_packet()
 
     def get_devices(self, max_seen=None):
+        """
+        Get a list of all responding devices.
+
+        :param max_seen: The number of seconds since the device was last seen, defaults to 3 times the devicepoll interval.
+        """
         if max_seen is None:
             max_seen = self._devicepolltime * MISSED_POLLS
 
@@ -111,12 +137,30 @@ class Client(object):
         return sorted(devices, key=lambda k:k.device_id)
 
     def by_label(self, label):
+        """
+        Return a list of devices with the label specified.
+
+        :param by_label: The label we are looking for.
+        :returns: list -- The devices that match criteria
+        """
         return filter(lambda d: d.label == label, self.get_devices())
 
     def by_id(self, id):
+        """
+        Return the device with the id specified.
+
+        :param id: The device id
+        :returns: Device -- The device with the matching id.
+        """
         return filter(lambda d: d.device_id == id, self.get_devices())[0]
 
     def by_power(self, power):
+        """
+        Return a list of devices based on power states.
+
+        :param power: True returns all devices that are on, False returns ones that are off.
+        :returns: list -- The devices that match criteria
+        """
         return filter(lambda d: d.power == power, self.get_devices())
 
     def __getitem__(self, key):
