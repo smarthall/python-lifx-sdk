@@ -166,7 +166,7 @@ messages = {
     },
     TYPE_STATEHOSTFIRMWARE: {
         'format': 'u64u64u32',
-        'byteswap': '844',
+        'byteswap': '884',
         'fields': namedtuple('payload_statehostfirmware', [
             'build',
             'reserved',
