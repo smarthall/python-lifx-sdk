@@ -9,6 +9,10 @@ MAC_TEST_CASES = [
         (pow(2, 6*8) - 1, 'ffffffffffff'), # Maximum
 ]
 
+VERSION_TEST_CASES = [
+        (0x00020001, '2.1'),
+]
+
 BYTES_TO_LABEL_CASES = [
         (bytearray(b'Right \xe2\x86\x97\xef\xb8\x8f\x00'), u'Right \u2197\ufe0f'),
         (bytearray(b'\x00'), u''),
@@ -52,6 +56,10 @@ class ProtocolTests(unittest.TestCase):
     def test_mac_string(self):
         for val, mac in MAC_TEST_CASES:
             self.assertEqual(lifx.protocol.mac_string(val), mac)
+
+    def test_version_string(self):
+        for vnum, vstr in VERSION_TEST_CASES:
+            self.assertEqual(lifx.protocol.version_string(vnum), vstr)
 
     def test_bytes_to_label(self):
         for val, string in BYTES_TO_LABEL_CASES:

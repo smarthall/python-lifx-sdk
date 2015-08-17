@@ -167,6 +167,22 @@ class Device(object):
         return self._host
 
     @property
+    def host_firmware(self):
+        """
+        The version string representing the firmware version.
+        """
+        response = self._block_for_response(pkt_type=protocol.TYPE_GETHOSTFIRMWARE)
+        return protocol.version_string(response.version)
+
+    @property
+    def wifi_firmware(self):
+        """
+        The version string representing the firmware version.
+        """
+        response = self._block_for_response(pkt_type=protocol.TYPE_GETWIFIFIRMWARE)
+        return protocol.version_string(response.version)
+
+    @property
     def device_id(self):
         """
         The device id. Read Only.

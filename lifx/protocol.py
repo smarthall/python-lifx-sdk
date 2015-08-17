@@ -358,6 +358,17 @@ def mac_string(device_id):
     """
     return hexlify(byteswap('6', pack('u48', device_id)))
 
+def version_string(version):
+    """
+    Converts a version number into a version string
+
+    :param version: The version number from the firmware
+    :returns str -- The version string
+    """
+    major_version = version >> 0x10
+    minor_version = version & 0xFFFF
+    return '%d.%d' % (major_version, minor_version)
+
 def bytes_to_label(label_bytes):
     """
     Takes the bytes from a TYPE_STATELABEL packet removes the NUL char and
