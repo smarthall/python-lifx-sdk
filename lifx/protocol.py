@@ -66,6 +66,10 @@ TYPE_GETVERSION = 32
 TYPE_STATEVERSION = 33
 TYPE_GETINFO = 34
 TYPE_STATEINFO = 35
+TYPE_GETLOCATION = 48
+TYPE_STATELOCATION = 50
+TYPE_GETGROUP = 51
+TYPE_STATEGROUP = 53
 TYPE_ACKNOWLEDGEMENT = 45
 TYPE_ECHOREQUEST = 58
 TYPE_ECHORESPONSE = 59
@@ -89,6 +93,8 @@ CLASS_TYPE_GET = (
     TYPE_GETLABEL,
     TYPE_GETVERSION,
     TYPE_GETINFO,
+    TYPE_GETLOCATION,
+    TYPE_GETGROUP,
     TYPE_LIGHT_GET,
     TYPE_LIGHT_GETPOWER,
 )
@@ -110,6 +116,8 @@ CLASS_TYPE_STATE = (
     TYPE_STATELABEL,
     TYPE_STATEVERSION,
     TYPE_STATEINFO,
+    TYPE_STATELOCATION,
+    TYPE_STATEGROUP,
     TYPE_LIGHT_STATE,
     TYPE_LIGHT_STATEPOWER,
 )
@@ -278,6 +286,36 @@ messages = {
         'format': '',
         'byteswap': '',
         'fields': namedtuple('payload_acknowledgement', [
+        ]),
+    },
+    TYPE_GETLOCATION: {
+        'format': '',
+        'byteswap': '',
+        'fields': namedtuple('payload_getlocation', [
+        ]),
+    },
+    TYPE_STATELOCATION: {
+        'format': 'b128b256u64',
+        'byteswap': '1' * 16 + '1' * 32 + '8',
+        'fields': namedtuple('payload_statelocation', [
+            'location',
+            'label',
+            'updated_at',
+        ]),
+    },
+    TYPE_GETGROUP: {
+        'format': '',
+        'byteswap': '',
+        'fields': namedtuple('payload_getgroup', [
+        ]),
+    },
+    TYPE_STATEGROUP: {
+        'format': 'b128b256u64',
+        'byteswap': '1' * 16 + '1' * 32 + '8',
+        'fields': namedtuple('payload_stategroup', [
+            'group',
+            'label',
+            'updated_at',
         ]),
     },
     TYPE_ECHOREQUEST: {
