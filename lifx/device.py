@@ -5,7 +5,18 @@ from lifx.color import modify_color
 import color
 
 DEFAULT_DURATION = 200
-DEFAULT_TIMEOUT = 5
+DEFAULT_TIMEOUT = 3.0
+DEFAULT_RETRANSMITS = 20
+
+class DeviceTimeoutError(Exception):
+    '''Raise when we time out waiting for a response'''
+    def __init__(self, device, timeout, retransmits):
+        message = "Device with id:'%s' timed out after %s seconds and %s retransmissions." % (protocol.mac_string(device.id), timeout, retransmits)
+
+        super(DeviceTimeoutError, self).__init__(message)
+        self.device = device
+        self.timeout = timeout
+        self.retransmits = retransmits
 
 class Device(object):
     def __init__(self, device_id, host, client):
@@ -64,60 +75,57 @@ class Device(object):
         )
 
     def _block_for_response(self, *args, **kwargs):
-        """
-        Send a packet and block waiting for the response, return the response payload.
-
-        Only needs the type and an optional payload.
-        """
-        sequence = self._seq
-        timeout = kwargs.get('timeout', DEFAULT_TIMEOUT)
-
-        e = Event()
-        self._tracked[sequence] = e
-
-        self._send_packet(
-                ack_required=False,
-                res_required=True,
-                sequence=sequence,
-                *args,
-                **kwargs
-        )
-
-        e.wait(timeout)
-        del self._tracked[sequence]
-
-        # TODO: Check if it was the response we expected
-        # TODO: Retransmissions
-
-        return self._responses[sequence].payload
+        return self._block_for(False, True, *args, **kwargs)
 
     def _block_for_ack(self, *args, **kwargs):
+        return self._block_for(True, False, *args, **kwargs)
+
+    def _block_for(self, need_ack, need_res, *args, **kwargs):
         """
-        Send a packet and block waiting for the acknowledgement
+        Send a packet and block waiting for the replies.
 
         Only needs the type and an optional payload.
         """
+        if need_ack and need_res:
+            raise NotImplemented('Waiting for both acknowledgement and response not yet supported.')
+
         sequence = self._seq
         timeout = kwargs.get('timeout', DEFAULT_TIMEOUT)
+        sub_timeout = timeout / DEFAULT_RETRANSMITS
 
-        e = Event()
-        self._tracked[sequence] = e
+        for i in range(1, DEFAULT_RETRANSMITS):
+            e = Event()
+            self._tracked[sequence] = e
 
-        self._send_packet(
-                ack_required=True,
-                res_required=False,
-                sequence=sequence,
-                *args,
-                **kwargs
-        )
+            self._send_packet(
+                    ack_required=need_ack,
+                    res_required=need_res,
+                    sequence=sequence,
+                    *args,
+                    **kwargs
+            )
 
-        res = e.wait(timeout)
-        del self._tracked[sequence]
+            # If we don't care about a response, don't block at all
+            if not (need_ack or need_res):
+                return None
 
-        # TODO: Check if the response was actually an ack
-        # TODO: Retransmissions
+            res = e.wait(sub_timeout)
+            del self._tracked[sequence]
+            foundresponse = sequence in self._responses.keys()
 
-        return True
+            if foundresponse:
+                response = self._responses[sequence]
+
+                # TODO: Check if the response was actually what we expected
+
+                if need_res:
+                    return response.payload
+                else:
+                    return True
+
+        # We did get a response
+        raise DeviceTimeoutError(self, timeout, DEFAULT_RETRANSMITS)
+
 
     def _get_group_data(self):
         """
