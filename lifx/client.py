@@ -6,6 +6,7 @@ import network
 import protocol
 import device
 import util
+import group
 
 MISSED_POLLS = 3
 
@@ -37,10 +38,15 @@ class Client(object):
 
         # Storage for devices
         self._devices = {}
+        self._groups = {}
 
-        # Install our packet handler
+        # Install our service packet handler
         pktfilter = lambda p:p.protocol_header.pkt_type == protocol.TYPE_STATESERVICE
         self._transport.register_packet_handler(self._servicepacket, pktfilter)
+
+        # Install the group packet handler
+        pktfilter = lambda p:p.protocol_header.pkt_type == protocol.TYPE_STATEGROUP
+        self._transport.register_packet_handler(self._grouppacket, pktfilter)
 
         # Send initial discovery packet
         self.discover()
@@ -57,7 +63,7 @@ class Client(object):
         self._discoverpoll.cancel()
 
     def __repr__(self):
-        return repr(self.get_devices())
+        return '<Client %s>' % repr(self.get_devices())
 
     @property
     def _seq(self):
@@ -88,6 +94,20 @@ class Client(object):
 
             # Store it
             self._devices[deviceid] = new_device
+
+    def _grouppacket(self, host, port, packet):
+        # Gather Data
+        group_id = packet.payload.group
+        group_id_tuple = tuple(group_id) # Hashable type
+        group_label = packet.payload.label
+        updated_at = packet.payload.updated_at
+
+        if group_id_tuple not in self._groups:
+            # Make a new Group
+            new_group = group.Group(group_id, self)
+
+            # Store it
+            self._groups[group_id_tuple] = new_group
 
     def send_packet(self, *args, **kwargs):
         """
@@ -134,7 +154,29 @@ class Client(object):
         devices = filter(lambda x:x.seen_ago < seen_delta, self._devices.values())
 
         # Sort by device id to ensure consistent ordering
-        return sorted(devices, key=lambda k:k.device_id)
+        return sorted(devices, key=lambda k:k.id)
+
+    def get_groups(self, max_seen=None):
+        """
+        Get a list of all groups with responding devices.
+
+        :param max_seen: The number of seconds since a device in the group device was last seen, defaults to 3 times the devicepoll interval.
+        """
+        devices = self.get_devices(max_seen)
+        group_ids = set(map(lambda x:tuple(x.group_id), devices))
+        groups = map(lambda x:self._groups[x], group_ids)
+
+        # Sort by device id to ensure consistent ordering
+        return sorted(groups, key=lambda k:k.id)
+
+    def group_by_label(self, label):
+        """
+        Return a list of groups with the label specified.
+
+        :param by_label: The label we are looking for.
+        :returns: list -- The groups that match criteria
+        """
+        return filter(lambda d: d.label == label, self.get_groups())
 
     def by_label(self, label):
         """
@@ -152,7 +194,7 @@ class Client(object):
         :param id: The device id
         :returns: Device -- The device with the matching id.
         """
-        return filter(lambda d: d.device_id == id, self.get_devices())[0]
+        return filter(lambda d: d.id == id, self.get_devices())[0]
 
     def by_power(self, power):
         """
@@ -163,6 +205,23 @@ class Client(object):
         """
         return filter(lambda d: d.power == power, self.get_devices())
 
+    def by_group_id(self, group_id):
+        """
+        Return a list of devices based on their group membership.
+
+        :param group_id: The group id to match on each light.
+        :returns: list -- The devices that match criteria
+        """
+        return filter(lambda d: d.group_id == group_id, self.get_devices())
+
     def __getitem__(self, key):
         return self.get_devices()[key]
+
+    @property
+    def devices(self):
+        return self.get_devices()
+
+    @property
+    def groups(self):
+        return self.get_groups()
 
