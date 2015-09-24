@@ -109,11 +109,7 @@ class Device(object):
             if not (need_ack or need_res):
                 return None
 
-            e.wait(sub_timeout)
-            del self._tracked[sequence]
-            foundresponse = sequence in self._responses.keys()
-
-            if foundresponse:
+            if e.wait(sub_timeout):
                 response = self._responses[sequence]
 
                 # TODO: Check if the response was actually what we expected
