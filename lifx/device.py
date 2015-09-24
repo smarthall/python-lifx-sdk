@@ -6,7 +6,7 @@ import color
 
 DEFAULT_DURATION = 200
 DEFAULT_TIMEOUT = 3.0
-DEFAULT_RETRANSMITS = 20
+DEFAULT_RETRANSMITS = 30
 
 class DeviceTimeoutError(Exception):
     '''Raise when we time out waiting for a response'''
@@ -109,7 +109,7 @@ class Device(object):
             if not (need_ack or need_res):
                 return None
 
-            res = e.wait(sub_timeout)
+            e.wait(sub_timeout)
             del self._tracked[sequence]
             foundresponse = sequence in self._responses.keys()
 

@@ -11,7 +11,7 @@ import group
 MISSED_POLLS = 3
 
 class Client(object):
-    def __init__(self, broadcast='255.255.255.255', address='0.0.0.0', discoverpoll=60, devicepoll=20):
+    def __init__(self, broadcast='255.255.255.255', address='0.0.0.0', discoverpoll=60, devicepoll=5):
         """
         The Client object is responsible for discovering lights and managing
         incoming and outgoing packets. This is the class most people will use to
