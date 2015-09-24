@@ -1,6 +1,15 @@
-import readline
 import code
 import lifx
+
+# Try to get readline if available
+try:
+    import readline
+except ImportError:
+    try:
+        import pyreadline as readline
+    except ImportError:
+        pass
+
 
 # Start the client
 lights = lifx.Client()
