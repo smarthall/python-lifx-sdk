@@ -319,14 +319,14 @@ messages = {
         ]),
     },
     TYPE_ECHOREQUEST: {
-        'format': 'b64',
+        'format': 'b512',
         'byteswap': '1' * 64,
         'fields': namedtuple('payload_echorequest', [
             'payload',
         ]),
     },
     TYPE_ECHORESPONSE: {
-        'format': 'b64',
+        'format': 'b512',
         'byteswap': '1' * 64,
         'fields': namedtuple('payload_echoresponse', [
             'payload',

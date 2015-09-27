@@ -85,6 +85,7 @@ class Client(object):
                     p.frame_address.target == deviceid
                     and (
                         p.protocol_header.pkt_type == protocol.TYPE_ACKNOWLEDGEMENT
+                        or p.protocol_header.pkt_type == protocol.TYPE_ECHORESPONSE
                         or p.protocol_header.pkt_type in protocol.CLASS_TYPE_STATE
                     ))
             self._transport.register_packet_handler(new_device._packethandler, pktfilter)

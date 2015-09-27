@@ -3,6 +3,7 @@ import protocol
 from threading import Event
 from lifx.color import modify_color
 import color
+import time
 
 DEFAULT_DURATION = 200
 DEFAULT_TIMEOUT = 3.0
@@ -206,6 +207,17 @@ class Device(object):
         The device id. Read Only.
         """
         return self._device_id
+
+    @property
+    def latency(self):
+        """
+        The latency to the device. Read Only.
+        """
+        ping_payload = bytearray('\x00' * 64)
+        start = time.time()
+        response = self._block_for_response(ping_payload, pkt_type=protocol.TYPE_ECHOREQUEST)
+        end = time.time()
+        return end - start
 
     @property
     def label(self):
