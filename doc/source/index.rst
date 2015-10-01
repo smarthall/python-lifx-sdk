@@ -46,7 +46,7 @@ This is demonstrated in the following code:
     time.sleep(1)
 
     # Turn all bulbs off
-    for l in lights.get_devices()
+    for l in lights.get_devices():
         print 'Turning off %s' % l.label
         l.power = False
 
