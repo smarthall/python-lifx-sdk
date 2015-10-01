@@ -1,13 +1,16 @@
 from datetime import datetime
 import protocol
 from threading import Event
+from collections import namedtuple
 from lifx.color import modify_color
 import color
 import time
 
 DEFAULT_DURATION = 200
-DEFAULT_TIMEOUT = 3.0
-DEFAULT_RETRANSMITS = 30
+DEFAULT_TIMEOUT = 2.0
+DEFAULT_RETRANSMITS = 10
+
+StatsTuple = namedtuple('StatsTuple', ['dropped_packets', 'sent_packets'])
 
 class DeviceTimeoutError(Exception):
     '''Raise when we time out waiting for a response'''
@@ -37,6 +40,10 @@ class Device(object):
         # Tools for tracking responses
         self._tracked = {}
         self._responses = {}
+
+        # Stats tracking
+        self._dropped_packets = 0
+        self._sent_packets = 0
 
     @property
     def _seq(self):
@@ -70,6 +77,8 @@ class Device(object):
         kwargs['port'] = self.get_port()
         kwargs['target'] = self._device_id
 
+        self._sent_packets += 1
+
         return self._client.send_packet(
                 *args,
                 **kwargs
@@ -95,6 +104,9 @@ class Device(object):
         sub_timeout = timeout / DEFAULT_RETRANSMITS
 
         for i in range(1, DEFAULT_RETRANSMITS):
+            if i != 1:
+                self._dropped_packets += 1
+
             e = Event()
             self._tracked[sequence] = e
 
@@ -155,6 +167,13 @@ class Device(object):
         :param service_id: The service whose port we are fetching.
         """
         return self._services[service_id]
+
+    @property
+    def stats(self):
+        return StatsTuple(
+                dropped_packets=self._dropped_packets,
+                sent_packets=self._sent_packets,
+        )
 
     @property
     def group_id(self):
