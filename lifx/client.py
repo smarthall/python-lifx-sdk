@@ -76,7 +76,7 @@ class Client(object):
         port = packet.payload.port
         deviceid = packet.frame_address.target
 
-        if deviceid not in self._devices:
+        if deviceid not in self._devices and service == protocol.SERVICE_UDP:
             # Create a new Device
             new_device = device.Device(deviceid, host, self)
 

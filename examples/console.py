@@ -12,7 +12,7 @@ except ImportError:
 
 
 # Start the client
-lights = lifx.Client()
+lights = lifx.Client(broadcast='192.168.1.255')
 
 # Start interactive console
 shell = code.InteractiveConsole({'lights': lights})
