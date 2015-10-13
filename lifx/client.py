@@ -105,7 +105,7 @@ class Client(object):
 
         if group_id_tuple not in self._groups:
             # Make a new Group
-            new_group = group.Group(group_id, self)
+            new_group = group.Group(group_id, self, self.by_group_id)
 
             # Store it
             self._groups[group_id_tuple] = new_group

@@ -3,9 +3,10 @@ from device import DEFAULT_DURATION
 import protocol
 
 class Group(object):
-    def __init__(self, group_id, client):
+    def __init__(self, group_id, client, members):
         self._client = client
         self._id = group_id
+        self._membership_func = members
 
     def __repr__(self):
         return "<Group Label:%s, %s>" % (repr(self.label), repr(self.members))
@@ -18,7 +19,7 @@ class Group(object):
         """
         A list of lights in this group.
         """
-        return self._client.by_group_id(self._id)
+        return self._membership_func(self._id)
 
     @property
     def id(self):
