@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 setup(
     # Project Details
     name='lifx-sdk',
-    version='0.7',
+    version='0.8',
     packages=['lifx'],
 
     # Dependencies
