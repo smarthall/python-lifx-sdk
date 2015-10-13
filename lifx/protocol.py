@@ -1,9 +1,11 @@
 from bitstruct import unpack, pack, byteswap, calcsize
 from binascii import hexlify
 from collections import namedtuple
+from pkg_resources import iter_entry_points
 
 UINT16_MAX = pow(2, 16) - 1
 LABEL_MAXLEN = 32
+ENTRYPOINT = 'lifx.protocol'
 
 # Packet tuple
 lifx_packet = namedtuple('lifx_packet', ['frame_header', 'frame_address', 'protocol_header', 'payload'])
@@ -599,4 +601,16 @@ def discovery_packet(source, sequence):
             sequence=sequence,
             pkt_type=TYPE_GETSERVICE,
     )
+
+# Load plugins that provide new messages
+for entrypoint in iter_entry_points(ENTRYPOINT):
+    protocol_module = entrypoint.load()
+
+    CLASS_TYPE_GET += getattr(protocol_module, 'CLASS_TYPE_GET', ())
+    CLASS_TYPE_SET += getattr(protocol_module, 'CLASS_TYPE_SET', ())
+    CLASS_TYPE_STATE += getattr(protocol_module, 'CLASS_TYPE_STATE', ())
+    CLASS_TYPE_OTHER += getattr(protocol_module, 'CLASS_TYPE_OTHER', ())
+
+    new_messages = getattr(protocol_module, 'messages', {})
+    messages.update(new_messages)
 
