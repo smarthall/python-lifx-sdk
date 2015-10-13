@@ -39,6 +39,7 @@ class Client(object):
         # Storage for devices
         self._devices = {}
         self._groups = {}
+        self._locations = {}
 
         # Install our service packet handler
         pktfilter = lambda p:p.protocol_header.pkt_type == protocol.TYPE_STATESERVICE
@@ -47,6 +48,10 @@ class Client(object):
         # Install the group packet handler
         pktfilter = lambda p:p.protocol_header.pkt_type == protocol.TYPE_STATEGROUP
         self._transport.register_packet_handler(self._grouppacket, pktfilter)
+
+        # Install the location packet handler
+        pktfilter = lambda p:p.protocol_header.pkt_type == protocol.TYPE_STATELOCATION
+        self._transport.register_packet_handler(self._locationpacket, pktfilter)
 
         # Send initial discovery packet
         self.discover()
@@ -105,10 +110,24 @@ class Client(object):
 
         if group_id_tuple not in self._groups:
             # Make a new Group
-            new_group = group.Group(group_id, self, self.by_group_id)
+            new_group = group.Group(group_id, self, self.by_group_id, device.Device._get_group_data)
 
             # Store it
             self._groups[group_id_tuple] = new_group
+
+    def _locationpacket(self, host, port, packet):
+        # Gather Data
+        location_id = packet.payload.location
+        location_id_tuple = tuple(location_id) # Hashable type
+        location_label = packet.payload.label
+        updated_at = packet.payload.updated_at
+
+        if location_id_tuple not in self._locations:
+            # Make a new Group for the location
+            new_location = group.Group(location_id, self, self.by_location_id, device.Device._get_location_data)
+
+            # Store it
+            self._locations[location_id_tuple] = new_location
 
     def send_packet(self, *args, **kwargs):
         """
@@ -161,14 +180,27 @@ class Client(object):
         """
         Get a list of all groups with responding devices.
 
-        :param max_seen: The number of seconds since a device in the group device was last seen, defaults to 3 times the devicepoll interval.
+        :param max_seen: The number of seconds since a device in the group was last seen, defaults to 3 times the devicepoll interval.
         """
         devices = self.get_devices(max_seen)
         group_ids = set(map(lambda x:tuple(x.group_id), devices))
         groups = map(lambda x:self._groups[x], group_ids)
 
-        # Sort by device id to ensure consistent ordering
+        # Sort by group id to ensure consistent ordering
         return sorted(groups, key=lambda k:k.id)
+
+    def get_locations(self, max_seen=None):
+        """
+        Get a list of all locations with responding devices.
+
+        :param max_seen: The number of seconds since a device in the location was last seen, defaults to 3 times the devicepoll interval.
+        """
+        devices = self.get_devices(max_seen)
+        location_ids = set(map(lambda x:tuple(x.location_id), devices))
+        locations = map(lambda x:self._locations[x], location_ids)
+
+        # Sort by location id to ensure consistent ordering
+        return sorted(locations, key=lambda k:k.id)
 
     def group_by_label(self, label):
         """
@@ -215,6 +247,15 @@ class Client(object):
         """
         return filter(lambda d: d.group_id == group_id, self.get_devices())
 
+    def by_location_id(self, location_id):
+        """
+        Return a list of devices based on their group membership.
+
+        :param group_id: The group id to match on each light.
+        :returns: list -- The devices that match criteria
+        """
+        return filter(lambda d: d.location_id == location_id, self.get_devices())
+
     def __getitem__(self, key):
         return self.get_devices()[key]
 
@@ -225,4 +266,8 @@ class Client(object):
     @property
     def groups(self):
         return self.get_groups()
+
+    @property
+    def locations(self):
+        return self.get_locations()
 

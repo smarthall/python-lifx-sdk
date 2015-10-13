@@ -3,10 +3,11 @@ from device import DEFAULT_DURATION
 import protocol
 
 class Group(object):
-    def __init__(self, group_id, client, members):
+    def __init__(self, group_id, client, member_func, label_func):
         self._client = client
         self._id = group_id
-        self._membership_func = members
+        self._membership_func = member_func
+        self._label_func = label_func
 
     def __repr__(self):
         return "<Group Label:%s, %s>" % (repr(self.label), repr(self.members))
@@ -33,7 +34,7 @@ class Group(object):
         """
         The Label on this group
         """
-        labels = map(lambda x:x._get_group_data(), self.members)
+        labels = map(self._label_func, self.members)
         labels.sort(key=lambda k:k.updated_at)
         return protocol.bytes_to_label(labels[0].label)
 

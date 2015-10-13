@@ -142,6 +142,12 @@ class Device(object):
         """
         return self._block_for_response(pkt_type=protocol.TYPE_GETGROUP)
 
+    def _get_location_data(self):
+        """
+        Called by the group object so it can see the updated_at from the location
+        """
+        return self._block_for_response(pkt_type=protocol.TYPE_GETLOCATION)
+
     def send_poll_packet(self):
         """
         Send a poll packet to the device, without waiting for a response. The
@@ -182,6 +188,14 @@ class Device(object):
         """
         response = self._get_group_data()
         return response.group
+
+    @property
+    def location_id(self):
+        """
+        The id of the group that the Device is in. Read Only.
+        """
+        response = self._get_location_data()
+        return response.location
 
     @property
     def udp_port(self):
