@@ -1,3 +1,4 @@
+import os
 import code
 import lifx
 
@@ -10,9 +11,10 @@ except ImportError:
     except ImportError:
         pass
 
+broadcast_addr = os.environ.get('LIFX_BROADCAST', '255.255.255.255')
 
 # Start the client
-lights = lifx.Client()
+lights = lifx.Client(broadcast=broadcast_addr)
 
 # Start interactive console
 shell = code.InteractiveConsole({'lights': lights})
