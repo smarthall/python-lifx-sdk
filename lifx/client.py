@@ -1,6 +1,7 @@
 import random
 import threading
 from datetime import datetime, timedelta
+from pkg_resources import iter_entry_points
 
 import network
 import protocol
@@ -9,6 +10,13 @@ import util
 import group
 
 MISSED_POLLS = 3
+
+# Get all the mixins for the device class from the plugins available
+ENTRYPOINT = 'lifx.device.mixin'
+devicebases = [entrypoint.load() for entrypoint in iter_entry_points(ENTRYPOINT)]
+devicebases.append(device.Device,)
+Device = type('Device', tuple(devicebases), {})
+del devicebases
 
 class Client(object):
     def __init__(self, broadcast='255.255.255.255', address='0.0.0.0', discoverpoll=60, devicepoll=5):
@@ -83,7 +91,7 @@ class Client(object):
 
         if deviceid not in self._devices and service == protocol.SERVICE_UDP:
             # Create a new Device
-            new_device = device.Device(deviceid, host, self)
+            new_device = Device(deviceid, host, self)
 
             # Send its own packets to it
             pktfilter = lambda p:(
