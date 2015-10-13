@@ -28,6 +28,14 @@ lifx.device module
     :undoc-members:
     :show-inheritance:
 
+lifx.group module
+------------------
+
+.. automodule:: lifx.group
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 lifx.network module
 -------------------
 
