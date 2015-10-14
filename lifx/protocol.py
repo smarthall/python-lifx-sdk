@@ -2,6 +2,7 @@ from bitstruct import unpack, pack, byteswap, calcsize
 from binascii import hexlify
 from collections import namedtuple
 from pkg_resources import iter_entry_points
+from datetime import datetime
 
 UINT16_MAX = pow(2, 16) - 1
 LABEL_MAXLEN = 32
@@ -397,6 +398,12 @@ def mac_string(device_id):
     :returns: str -- The mac address represented as a string
     """
     return hexlify(byteswap('6', pack('u48', device_id)))
+
+def timestamp_datetime(timestamp):
+    """
+    Converts a timestamp from the device to a python datetime value
+    """
+    return datetime.fromtimestamp(timestamp / 1000000000.0)
 
 def version_string(version):
     """
