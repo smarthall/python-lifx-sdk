@@ -74,6 +74,7 @@ class Client(object):
 
     def __del__(self):
         self._discoverpoll.cancel()
+        self._devicepoll.cancel()
 
     def __repr__(self):
         return '<Client %s>' % repr(self.get_devices())
